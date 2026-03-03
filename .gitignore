@@ -26,3 +26,12 @@ dist-ssr
 # trae
 .trae/
 
+# Nginx gateway
+nginx-gateway/static/
+nginx-gateway/nginx.conf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
