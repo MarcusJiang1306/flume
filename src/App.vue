@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, markRaw, h } from 'vue';
+import { ref, computed, markRaw, h } from 'vue';
 import { VueFlow } from '@vue-flow/core';
 import { Controls } from '@vue-flow/controls';
 import { Background } from '@vue-flow/background';
 import '@vue-flow/core/dist/style.css';
 import { useFlowEditor } from './composables/useFlowEditor';
+import { useKeyboard } from './composables/useKeyboard';
 import CustomNode from './components/CustomNode.vue';
 
 // 初始化流程编辑器
@@ -109,27 +110,12 @@ const onConnect = (connection: any) => {
   handleConnect(connection);
 };
 
-// 键盘事件处理（全局监听）
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    addChildNode();
-  } else if (e.key === 'Delete' || e.key === 'Backspace') {
-    e.preventDefault();
-    deleteSelected();
-  } else if (e.ctrlKey && e.key === 'l') {
-    e.preventDefault();
-    runLayout();
-  }
-};
-
-// 生命周期
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown);
+// 键盘快捷键
+useKeyboard({
+  tab: addChildNode,
+  delete: deleteSelected,
+  backspace: deleteSelected,
+  ctrlL: runLayout
 });
 </script>
 
@@ -168,6 +154,8 @@ onUnmounted(() => {
         :nodes="plottedNodes"
         :edges="plottedEdges"
         :node-types="nodeTypes"
+        :default-viewport="{ x: 0, y: 0, zoom: 1 }"
+        :fit-view-on-init="false"
         class="vue-flow"
         @node-click="onNodeClick"
         @edge-click="onEdgeClick"

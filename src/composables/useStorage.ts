@@ -1,0 +1,55 @@
+import type { NodeData, EdgeData } from '../types';
+
+// 生成唯一 ID
+let edgeCounter = parseInt(localStorage.getItem('edge-counter') || '0');
+let nodeCounter = parseInt(localStorage.getItem('node-counter') || '0');
+
+export const generateEdgeId = () => {
+  edgeCounter++;
+  localStorage.setItem('edge-counter', edgeCounter.toString());
+  return `edge-${edgeCounter}`;
+};
+
+export const generateNodeId = () => {
+  nodeCounter++;
+  localStorage.setItem('node-counter', nodeCounter.toString());
+  return `node-${nodeCounter}`;
+};
+
+// 从 localStorage 加载保存的数据
+export const loadSavedData = () => {
+  try {
+    const savedData = localStorage.getItem('mermaid-proxy-data');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      return { nodes: parsed.nodes || [], edges: parsed.edges || [] };
+    }
+  } catch (error) {
+    console.error('加载保存的数据失败:', error);
+  }
+  return null;
+};
+
+// 保存数据到 localStorage
+export const saveDataToStorage = (nodes: NodeData[], edges: EdgeData[]) => {
+  try {
+    localStorage.setItem('mermaid-proxy-data', JSON.stringify({ nodes, edges }));
+  } catch (error) {
+    console.error('保存数据失败:', error);
+  }
+};
+
+// 清除 localStorage
+export const clearSavedData = () => {
+  localStorage.removeItem('mermaid-proxy-data');
+  nodeCounter = 0;
+  edgeCounter = 0;
+};
+
+// 导出计数器重置函数（用于测试）
+export const resetCounters = () => {
+  nodeCounter = 0;
+  edgeCounter = 0;
+  localStorage.setItem('node-counter', '0');
+  localStorage.setItem('edge-counter', '0');
+};

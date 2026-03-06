@@ -1,7 +1,11 @@
-FROM nginx:latest
+FROM node:20-alpine
 
-COPY dist /usr/share/nginx/html/flume
+WORKDIR /app
 
-EXPOSE 80
+# 复制服务器文件和静态资源
+COPY server.js ./
+COPY dist ./dist
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8101
+
+CMD ["node", "server.js"]
