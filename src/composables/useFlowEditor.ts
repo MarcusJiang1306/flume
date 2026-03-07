@@ -11,8 +11,8 @@ export function useFlowEditor() {
 
   const rawNodes = ref<NodeData[]>(savedData?.nodes || [DEFAULT_ROOT_NODE]);
   const rawEdges = ref<EdgeData[]>(savedData?.edges || []);
-  const selectedNodeId = ref<string | null>(DEFAULT_ROOT_NODE.id);
-  const selectedEdgeId = ref<string | null>(null);
+  const selectedNode = ref<PlottedNodeData | null>(null);
+  const selectedEdge = ref<EdgeData | null>(null);
   const layoutDirection = ref<string>(savedData?.layoutDirection || DEFAULT_LAYOUT_DIRECTION);
 
   const plottedNodes = ref<PlottedNodeData[]>([]);
@@ -30,8 +30,8 @@ export function useFlowEditor() {
   const graphOps = useGraphOperations({
     rawNodes,
     rawEdges,
-    selectedNodeId,
-    selectedEdgeId,
+    selectedNode,
+    selectedEdge,
     layoutDirection,
     generateNodeId,
     generateEdgeId,
@@ -41,17 +41,26 @@ export function useFlowEditor() {
 
   const { generateMermaidCode } = useMermaid(rawNodes, rawEdges);
 
-  // 初始化布局（延迟执行，与其他操作保持一致）
-  // 注意：这里不调用 updateLayout，因为会在 App.vue 中通过 customRunLayout 统一处理
-
+  const setNodeEditing = (nodeId: string, isEditing: boolean) => {
+    console.log('setNodeEditing', { nodeId, isEditing });
+    plottedNodes.value = plottedNodes.value.map(n => 
+      n.id === nodeId 
+        ? { ...n, isEditing } 
+        : { ...n, isEditing: false }
+    );
+    // 只有在进入编辑模式时才更新 selectedNode
+    if (isEditing) {
+      selectedNode.value = plottedNodes.value.find(n => n.id === nodeId) || null;
+    }
+  };
 
   return {
     rawNodes,
     rawEdges,
     plottedNodes,
     plottedEdges,
-    selectedNodeId,
-    selectedEdgeId,
+    selectedNode,
+    selectedEdge,
     layoutDirection,
     selectNode: graphOps.selectNode,
     selectEdge: graphOps.selectEdge,
@@ -63,6 +72,7 @@ export function useFlowEditor() {
     updateNodeLabel: graphOps.updateNodeLabel,
     updateNode: graphOps.updateNode,
     setLayoutDirection: layout.setLayoutDirection,
-    clearSavedData
+    clearSavedData,
+    setNodeEditing
   };
 }

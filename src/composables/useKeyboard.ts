@@ -3,8 +3,7 @@ import { onMounted, onUnmounted } from 'vue';
 export interface KeyboardShortcuts {
   tab?: () => void;
   delete?: () => void;
-  backspace?: () => void;
-  ctrlL?: () => void;
+  enter?: () => void;
 }
 
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
@@ -14,20 +13,24 @@ export function useKeyboard(shortcuts: KeyboardShortcuts) {
       return;
     }
 
-    if (e.key === 'Tab' && shortcuts.tab) {
-      e.preventDefault();
-      shortcuts.tab();
-    } else if (e.key === 'Delete' && shortcuts.delete) {
-      e.preventDefault();
-      e.stopPropagation(); // 阻止 Vue Flow 默认行为
-      shortcuts.delete();
-    } else if (e.key === 'Backspace' && shortcuts.backspace) {
-      e.preventDefault();
-      e.stopPropagation(); // 阻止 Vue Flow 默认行为
-      shortcuts.backspace();
-    } else if (e.ctrlKey && e.key === 'l' && shortcuts.ctrlL) {
-      e.preventDefault();
-      shortcuts.ctrlL();
+    // 定义按键映射
+    const keyMap: Record<string, { 
+      handler?: () => void;
+      stopPropagation?: boolean;
+    }> = {
+      Tab: { handler: shortcuts.tab },
+      Delete: { handler: shortcuts.delete, stopPropagation: true },
+      Enter: { handler: shortcuts.enter }
+    };
+
+    // 执行对应的处理函数
+    const config = keyMap[e.key];
+    if (config && config.handler) {
+      e.preventDefault(); // 默认阻止默认行为
+      if (config.stopPropagation) {
+        e.stopPropagation(); // 阻止事件冒泡
+      }
+      config.handler(); // 执行回调函数
     }
   };
 

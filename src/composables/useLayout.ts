@@ -69,7 +69,10 @@ export function useLayout(options: LayoutOptions) {
 
       return {
         ...node,
-        data: { label: node.label, handlePositions: node.handlePositions },
+        data: { 
+          label: node.label, 
+          handlePositions: node.handlePositions
+        },
         position: { 
           x: rotated.x + offsetX - w / 2, 
           y: rotated.y + offsetY - h / 2 

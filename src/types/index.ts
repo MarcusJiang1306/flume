@@ -16,7 +16,7 @@ export type DirectionIndex = typeof DIR[keyof typeof DIR];
 // 抓手位置类型（从 DIR_MAP 推导）
 export type HandlePosition = typeof DIR_MAP[number];
 
-// 节点数据类型
+// 节点数据类型，感觉是不是可以和custom合并
 export interface NodeData {
   id: string;
   label: string;
@@ -54,6 +54,7 @@ export interface PlottedNodeData extends NodeData {
   };
   width?: number;
   height?: number;
+  isEditing?: boolean;
 }
 
 // 流程编辑器状态类型

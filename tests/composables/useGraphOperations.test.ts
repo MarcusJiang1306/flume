@@ -1,14 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import { useGraphOperations } from '../../src/composables/useGraphOperations';
 import { ref } from 'vue';
-import type { NodeData, EdgeData } from '../../src/types';
+import type { NodeData, EdgeData, PlottedNodeData } from '../../src/types';
 
 describe('useGraphOperations', () => {
   it('should initialize with correct structure', () => {
     const rawNodes = ref<NodeData[]>([]);
     const rawEdges = ref<EdgeData[]>([]);
-    const selectedNodeId = ref<string | null>(null);
-    const selectedEdgeId = ref<string | null>(null);
+    const selectedNode = ref<PlottedNodeData | null>(null);
+    const selectedEdge = ref<EdgeData | null>(null);
     const layoutDirection = ref('TB');
     const generateNodeId = vi.fn(() => 'node-1');
     const generateEdgeId = vi.fn(() => 'edge-1');
@@ -18,8 +18,8 @@ describe('useGraphOperations', () => {
     const graphOps = useGraphOperations({
       rawNodes,
       rawEdges,
-      selectedNodeId,
-      selectedEdgeId,
+      selectedNode,
+      selectedEdge,
       layoutDirection,
       generateNodeId,
       generateEdgeId,
@@ -39,8 +39,8 @@ describe('useGraphOperations', () => {
   it('should select node when selectNode is called', () => {
     const rawNodes = ref<NodeData[]>([{ id: 'node-1', label: 'Node 1', type: 'custom' }]);
     const rawEdges = ref<EdgeData[]>([]);
-    const selectedNodeId = ref<string | null>(null);
-    const selectedEdgeId = ref<string | null>(null);
+    const selectedNode = ref<PlottedNodeData | null>(null);
+    const selectedEdge = ref<EdgeData | null>(null);
     const layoutDirection = ref('TB');
     const generateNodeId = vi.fn();
     const generateEdgeId = vi.fn();
@@ -50,8 +50,8 @@ describe('useGraphOperations', () => {
     const graphOps = useGraphOperations({
       rawNodes,
       rawEdges,
-      selectedNodeId,
-      selectedEdgeId,
+      selectedNode,
+      selectedEdge,
       layoutDirection,
       generateNodeId,
       generateEdgeId,
@@ -59,16 +59,22 @@ describe('useGraphOperations', () => {
       runLayout
     });
 
-    graphOps.selectNode('node-1');
-    expect(selectedNodeId.value).toBe('node-1');
-    expect(selectedEdgeId.value).toBe(null);
+    const mockNode: PlottedNodeData = {
+      id: 'node-1',
+      label: 'Node 1',
+      type: 'custom',
+      position: { x: 0, y: 0 }
+    };
+    graphOps.selectNode(mockNode);
+    expect(selectedNode.value).toEqual(mockNode);
+    expect(selectedEdge.value).toBe(null);
   });
 
   it('should select edge when selectEdge is called', () => {
     const rawNodes = ref<NodeData[]>([{ id: 'node-1', label: 'Node 1', type: 'custom' }]);
     const rawEdges = ref<EdgeData[]>([{ id: 'edge-1', source: 'node-1', target: 'node-2', type: 'smoothstep' }]);
-    const selectedNodeId = ref<string | null>(null);
-    const selectedEdgeId = ref<string | null>(null);
+    const selectedNode = ref<PlottedNodeData | null>(null);
+    const selectedEdge = ref<EdgeData | null>(null);
     const layoutDirection = ref('TB');
     const generateNodeId = vi.fn();
     const generateEdgeId = vi.fn();
@@ -78,8 +84,8 @@ describe('useGraphOperations', () => {
     const graphOps = useGraphOperations({
       rawNodes,
       rawEdges,
-      selectedNodeId,
-      selectedEdgeId,
+      selectedNode,
+      selectedEdge,
       layoutDirection,
       generateNodeId,
       generateEdgeId,
@@ -88,15 +94,20 @@ describe('useGraphOperations', () => {
     });
 
     graphOps.selectEdge('edge-1');
-    expect(selectedEdgeId.value).toBe('edge-1');
-    expect(selectedNodeId.value).toBe(null);
+    expect(selectedEdge.value).toEqual(rawEdges.value[0]);
+    expect(selectedNode.value).toBe(null);
   });
 
   it('should add child node when addChildNode is called', () => {
     const rawNodes = ref<NodeData[]>([{ id: 'node-1', label: 'Node 1', type: 'custom' }]);
     const rawEdges = ref<EdgeData[]>([]);
-    const selectedNodeId = ref<string | null>('node-1');
-    const selectedEdgeId = ref<string | null>(null);
+    const selectedNode = ref<PlottedNodeData | null>({
+      id: 'node-1',
+      label: 'Node 1',
+      type: 'custom',
+      position: { x: 0, y: 0 }
+    });
+    const selectedEdge = ref<EdgeData | null>(null);
     const layoutDirection = ref('TB');
     const generateNodeId = vi.fn(() => 'node-2');
     const generateEdgeId = vi.fn(() => 'edge-1');
@@ -106,8 +117,8 @@ describe('useGraphOperations', () => {
     const graphOps = useGraphOperations({
       rawNodes,
       rawEdges,
-      selectedNodeId,
-      selectedEdgeId,
+      selectedNode,
+      selectedEdge,
       layoutDirection,
       generateNodeId,
       generateEdgeId,
@@ -124,8 +135,13 @@ describe('useGraphOperations', () => {
   it('should update node label when updateNodeLabel is called', () => {
     const rawNodes = ref<NodeData[]>([{ id: 'node-1', label: 'Node 1', type: 'custom' }]);
     const rawEdges = ref<EdgeData[]>([]);
-    const selectedNodeId = ref<string | null>('node-1');
-    const selectedEdgeId = ref<string | null>(null);
+    const selectedNode = ref<PlottedNodeData | null>({
+      id: 'node-1',
+      label: 'Node 1',
+      type: 'custom',
+      position: { x: 0, y: 0 }
+    });
+    const selectedEdge = ref<EdgeData | null>(null);
     const layoutDirection = ref('TB');
     const generateNodeId = vi.fn();
     const generateEdgeId = vi.fn();
@@ -135,8 +151,8 @@ describe('useGraphOperations', () => {
     const graphOps = useGraphOperations({
       rawNodes,
       rawEdges,
-      selectedNodeId,
-      selectedEdgeId,
+      selectedNode,
+      selectedEdge,
       layoutDirection,
       generateNodeId,
       generateEdgeId,

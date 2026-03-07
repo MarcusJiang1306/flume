@@ -1,12 +1,12 @@
 import { nextTick, type Ref } from 'vue';
-import type { NodeData, EdgeData, LayoutDirection } from '../types';
+import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData } from '../types';
 import { DIR, stringToDirIndex, getStoredDirIndex, DEFAULT_HANDLES } from '../utils/direction';
 
 export interface GraphOperationsOptions {
   rawNodes: Ref<NodeData[]>;
   rawEdges: Ref<EdgeData[]>;
-  selectedNodeId: Ref<string | null>;
-  selectedEdgeId: Ref<string | null>;
+  selectedNode: Ref<PlottedNodeData | null>;
+  selectedEdge: Ref<EdgeData | null>;
   layoutDirection: Ref<string>;
   generateNodeId: () => string;
   generateEdgeId: () => string;
@@ -18,8 +18,8 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   const {
     rawNodes,
     rawEdges,
-    selectedNodeId,
-    selectedEdgeId,
+    selectedNode,
+    selectedEdge,
     layoutDirection,
     generateNodeId,
     generateEdgeId,
@@ -27,9 +27,13 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     runLayout
   } = options;
 
-  const select = (type: 'node' | 'edge', id: string) => {
-    selectedNodeId.value = type === 'node' ? id : null;
-    selectedEdgeId.value = type === 'edge' ? id : null;
+  const selectNode = (node: PlottedNodeData | null) => {
+    selectedNode.value = node;
+  };
+
+  const selectEdge = (id: string) => {
+    selectedNode.value = null;
+    selectedEdge.value = rawEdges.value.find(edge => edge.id === id) || null;
   };
 
   const updateNodeLabel = (id: string, label: string) => {
@@ -37,9 +41,9 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   };
 
   const addChildNode = () => {
-    if (!selectedNodeId.value) return;
+    if (!selectedNode.value) return;
 
-    const parentId = selectedNodeId.value;
+    const parentId = selectedNode.value.id;
     const newId = generateNodeId();
     
     rawNodes.value.push({ id: newId, label: '请输入文字', type: 'custom', handlePositions: DEFAULT_HANDLES });
@@ -100,15 +104,17 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   };
 
   const deleteSelected = () => {
-    if (selectedEdgeId.value) {
-      rawEdges.value = rawEdges.value.filter(e => e.id !== selectedEdgeId.value);
-      selectedEdgeId.value = null;
-      updateLayout();
-    } else if (selectedNodeId.value) {
-      const id = selectedNodeId.value;
+    if (selectedNode.value) {
+      const id = selectedNode.value.id;
       rawEdges.value = rawEdges.value.filter(e => e.source !== id && e.target !== id);
       rawNodes.value = rawNodes.value.filter(n => n.id !== id);
-      selectedNodeId.value = rawNodes.value[0]?.id || null;
+      selectedNode.value = null;
+      selectedEdge.value = null;
+      updateLayout();
+    } else if (selectedEdge.value) {
+      const id = selectedEdge.value.id;
+      rawEdges.value = rawEdges.value.filter(e => e.id !== id);
+      selectedEdge.value = null;
       updateLayout();
     }
   };
@@ -119,8 +125,8 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   };
 
   return {
-    selectNode: (id: string) => select('node', id),
-    selectEdge: (id: string) => select('edge', id),
+    selectNode,
+    selectEdge,
     updateNodeLabel,
     addChildNode,
     handleConnect,

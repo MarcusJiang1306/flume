@@ -15,7 +15,7 @@ const { fitView } = useVueFlow();
 const {
   plottedNodes,
   plottedEdges,
-  selectedNodeId,
+  selectedNode,
   layoutDirection,
   selectNode,
   selectEdge,
@@ -26,7 +26,8 @@ const {
   setLayoutDirection,
   generateMermaidCode,
   updateNode,
-  clearSavedData
+  clearSavedData,
+  setNodeEditing
 } = useFlowEditor();
 
 // 通用布局后自动缩放函数
@@ -47,14 +48,16 @@ const customSetLayoutDirection = (direction: string) =>
   runWithFitView(() => setLayoutDirection(direction));
 
 // 注册自定义节点类型（使用 markRaw 和 h 函数）
-const nodeTypes = markRaw({
+const nodeTypes = computed(() => markRaw({
   custom: (props: any) => {
     return h(CustomNode, {
       ...props,
-      updateNode: updateNode
+      updateNode: updateNode,
+      onEditStart: (nodeId: string) => setNodeEditing(nodeId, true),
+      onEditComplete: (nodeId: string) => setNodeEditing(nodeId, false)
     });
   }
-});
+}));
 
 // 状态
 const status = ref('就绪');
@@ -62,11 +65,6 @@ const showStatus = (msg: string) => {
   status.value = msg;
   setTimeout(() => status.value = '就绪', 2000);
 };
-
-// 计算属性：当前选中的节点
-const selectedNode = computed(() => 
-  plottedNodes.value.find(n => n.id === selectedNodeId.value) || null
-);
 
 // 复制 Mermaid 代码
 const copyMermaidCode = async () => {
@@ -87,25 +85,37 @@ const handleClearData = () => {
 };
 
 // Vue Flow 事件处理
-const onNodeClick = ({ node }: any) => node?.id && selectNode(node.id);
+const onNodeClick = ({ node }: any) => node?.id && selectNode(node);
 const onEdgeClick = ({ edge }: any) => edge?.id && selectEdge(edge.id);
 const onSelectionChange = ({ nodes, edges }: any) => {
   if (edges?.[0]) selectEdge(edges[0].id);
-  else if (nodes?.[0]) selectNode(nodes[0].id);
+  else if (nodes?.[0]) selectNode(nodes[0]);
 };
 const onConnect = handleConnect;
+
+// 激活选中节点的编辑模式
+const activateNodeEdit = () => {
+  console.log('activateNodeEdit', { selectedNode: selectedNode.value });
+  if (selectedNode.value) {
+    setNodeEditing(selectedNode.value.id, true);
+  }
+};
 
 // 键盘快捷键
 useKeyboard({
   tab: addChildNode,
   delete: deleteSelected,
-  ctrlL: customRunLayout
+  enter: activateNodeEdit
 });
 
 // 组件挂载时初始化布局
 onMounted(async () => {
   // 使用与其他布局操作完全相同的模式
   await customRunLayout();
+  // 初始化选中第一个节点
+  if (plottedNodes.value.length > 0 && !selectedNode.value) {
+    selectNode(plottedNodes.value[0] || null);
+  }
 });
 </script>
 

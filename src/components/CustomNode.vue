@@ -1,8 +1,8 @@
 <template>
   <div 
     class="custom-node" 
-    :class="{ 'is-selected': selected }"
-    @dblclick="startEdit"
+    :class="{ 'is-selected': selected, 'is-editing': isEditing }"
+    @dblclick="handleDblClick"
   >
     <Handle
       v-for="position in handlePositions"
@@ -17,31 +17,37 @@
       :disabled="!isEditing"
       :class="{ 'is-editing': isEditing }"
       class="node-input"
-      @blur="saveAndExit"
+      @blur="handleBlur"
+      @keydown.enter.stop="handleInputEnter"
+      @mousedown.stop
+      @click.stop
       ref="inputRef"
     />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Handle } from '@vue-flow/core';
-import { ref, nextTick, computed } from 'vue';
+import { ref, nextTick, computed, watch } from 'vue';
 
 const props = defineProps({
   data: { type: Object, required: true },
   id: { type: String, required: true },
   selected: { type: Boolean, default: false },
+  isEditing: { type: Boolean, default: false },
   updateNode: { type: Function, required: true }
 });
 
-const isEditing = ref(false);
-const inputRef = ref(null);
+const emit = defineEmits(['edit-start', 'edit-complete']);
+
+const inputRef = ref<HTMLInputElement | null>(null);
 const localValue = ref(props.data.label);
 
 const handlePositions = computed(() => props.data.handlePositions || ['top', 'bottom']);
 
+const isEditing = computed(() => props.isEditing || false);
+
 const startEdit = () => {
-  isEditing.value = true;
   localValue.value = props.data.label;
   nextTick(() => {
     inputRef.value?.focus();
@@ -54,8 +60,35 @@ const saveAndExit = () => {
   if (newValue !== props.data.label) {
     props.updateNode(props.id, { label: newValue });
   }
-  isEditing.value = false;
+  emit('edit-complete', props.id);
 };
+
+const handleDblClick = () => {
+  console.log('handleDblClick', { nodeId: props.id, isEditing: isEditing.value, dataIsEditing: props.data.isEditing });
+  if (!isEditing.value) {
+    emit('edit-start', props.id);
+  }
+};
+
+const handleBlur = () => {
+  saveAndExit();
+};
+
+const handleInputEnter = (event: KeyboardEvent) => {
+  event.stopPropagation();
+  saveAndExit();
+};
+
+// 监听编辑状态变化，自动聚焦到输入框
+watch(() => isEditing.value, (newValue) => {
+  if (newValue) {
+    startEdit();
+  }
+});
+
+defineExpose({
+  startEdit
+});
 </script>
 
 <style scoped>
@@ -78,6 +111,15 @@ const saveAndExit = () => {
 .custom-node.is-selected {
   border-color: #ff6b6b;
   box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.custom-node.is-editing {
+  cursor: text;
+  pointer-events: none;
+}
+
+.custom-node.is-editing .node-input {
+  pointer-events: auto;
 }
 
 .custom-node:hover {
