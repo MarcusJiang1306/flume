@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, markRaw, h } from 'vue';
-import { VueFlow } from '@vue-flow/core';
+import { ref, computed, markRaw, h, nextTick, onMounted } from 'vue';
+import { VueFlow, useVueFlow } from '@vue-flow/core';
 import { Controls } from '@vue-flow/controls';
 import { Background } from '@vue-flow/background';
 import '@vue-flow/core/dist/style.css';
 import { useFlowEditor } from './composables/useFlowEditor';
 import { useKeyboard } from './composables/useKeyboard';
 import CustomNode from './components/CustomNode.vue';
+
+// Vue Flow 实例
+const { fitView } = useVueFlow();
 
 // 初始化流程编辑器
 const {
@@ -22,10 +25,26 @@ const {
   runLayout,
   setLayoutDirection,
   generateMermaidCode,
-  updateNodeLabel,
   updateNode,
   clearSavedData
 } = useFlowEditor();
+
+// 通用布局后自动缩放函数
+const runWithFitView = async (layoutAction: () => void) => {
+  layoutAction();
+  // 等待布局更新完成（因为 runLayout 使用了 setTimeout(0)）
+  await new Promise(resolve => setTimeout(resolve, 10));
+  await nextTick();
+  // 布局完成后自动调整视口
+  fitView({ padding: 0.1 });
+};
+
+// 自定义布局函数（包含自动缩放）
+const customRunLayout = () => runWithFitView(runLayout);
+
+// 自定义设置布局方向函数（包含自动缩放）
+const customSetLayoutDirection = (direction: string) => 
+  runWithFitView(() => setLayoutDirection(direction));
 
 // 注册自定义节点类型（使用 markRaw 和 h 函数）
 const nodeTypes = markRaw({
@@ -39,34 +58,23 @@ const nodeTypes = markRaw({
 
 // 状态
 const status = ref('就绪');
-
-// 计算属性：当前选中的节点
-const selectedNode = computed(() => {
-  return plottedNodes.value.find(node => node.id === selectedNodeId.value) || null;
-});
-
-// 处理节点更新事件
-const handleNodeUpdate = (node: any) => {
-  console.log('节点更新事件:', node);
-  if (node.id && node.data && node.data.label !== undefined) {
-    updateNodeLabel(node.id, node.data.label);
-  }
+const showStatus = (msg: string) => {
+  status.value = msg;
+  setTimeout(() => status.value = '就绪', 2000);
 };
 
-// 复制 Mermaid 代码（异步）
+// 计算属性：当前选中的节点
+const selectedNode = computed(() => 
+  plottedNodes.value.find(n => n.id === selectedNodeId.value) || null
+);
+
+// 复制 Mermaid 代码
 const copyMermaidCode = async () => {
   try {
-    const code = generateMermaidCode();
-    await navigator.clipboard.writeText(code);
-    status.value = 'Mermaid 代码已复制到剪贴板';
-    setTimeout(() => {
-      status.value = '就绪';
-    }, 2000);
-  } catch (error) {
-    status.value = '复制失败，请手动复制';
-    setTimeout(() => {
-      status.value = '就绪';
-    }, 2000);
+    await navigator.clipboard.writeText(generateMermaidCode());
+    showStatus('Mermaid 代码已复制到剪贴板');
+  } catch {
+    showStatus('复制失败，请手动复制');
   }
 };
 
@@ -78,44 +86,26 @@ const handleClearData = () => {
   }
 };
 
-// 节点点击事件
-const onNodeClick = (event: any) => {
-  console.log('节点点击事件触发:', event);
-  if (event && event.node && event.node.id) {
-    selectNode(event.node.id);
-  }
+// Vue Flow 事件处理
+const onNodeClick = ({ node }: any) => node?.id && selectNode(node.id);
+const onEdgeClick = ({ edge }: any) => edge?.id && selectEdge(edge.id);
+const onSelectionChange = ({ nodes, edges }: any) => {
+  if (edges?.[0]) selectEdge(edges[0].id);
+  else if (nodes?.[0]) selectNode(nodes[0].id);
 };
-
-// 连线点击事件
-const onEdgeClick = (event: any) => {
-  console.log('连线点击事件触发:', event);
-  if (event && event.edge && event.edge.id) {
-    selectEdge(event.edge.id);
-  }
-};
-
-// 选中状态变化事件
-const onSelectionChange = (params: any) => {
-  console.log('选中状态变化:', params);
-  if (params.edges && params.edges.length > 0) {
-    selectEdge(params.edges[0].id);
-  } else if (params.nodes && params.nodes.length > 0) {
-    selectNode(params.nodes[0].id);
-  }
-};
-
-// 连线事件
-const onConnect = (connection: any) => {
-  console.log('Vue Flow 连接事件:', connection);
-  handleConnect(connection);
-};
+const onConnect = handleConnect;
 
 // 键盘快捷键
 useKeyboard({
   tab: addChildNode,
   delete: deleteSelected,
-  backspace: deleteSelected,
-  ctrlL: runLayout
+  ctrlL: customRunLayout
+});
+
+// 组件挂载时初始化布局
+onMounted(async () => {
+  // 使用与其他布局操作完全相同的模式
+  await customRunLayout();
 });
 </script>
 
@@ -129,12 +119,12 @@ useKeyboard({
           v-for="direction in ['TB', 'LR', 'BT', 'RL']" 
           :key="direction"
           :class="{ active: layoutDirection === direction }"
-          @click="setLayoutDirection(direction)"
+          @click="customSetLayoutDirection(direction)"
         >
           {{ direction }}
         </button>
       </div>
-      <button class="toolbar-button" @click="runLayout">
+      <button class="toolbar-button" @click="customRunLayout">
         <span class="icon">✨</span> 自动整理
       </button>
       <button class="toolbar-button" @click="copyMermaidCode">
@@ -156,12 +146,12 @@ useKeyboard({
         :node-types="nodeTypes"
         :default-viewport="{ x: 0, y: 0, zoom: 1 }"
         :fit-view-on-init="false"
+        :delete-key-code="null"
         class="vue-flow"
         @node-click="onNodeClick"
         @edge-click="onEdgeClick"
         @connect="onConnect"
         @selection-change="onSelectionChange"
-        @node-update="handleNodeUpdate"
       >
         <Background />
         <Controls />

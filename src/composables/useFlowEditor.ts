@@ -13,7 +13,7 @@ export function useFlowEditor() {
   const rawEdges = ref<EdgeData[]>(savedData?.edges || []);
   const selectedNodeId = ref<string | null>(DEFAULT_ROOT_NODE.id);
   const selectedEdgeId = ref<string | null>(null);
-  const layoutDirection = ref<string>(DEFAULT_LAYOUT_DIRECTION);
+  const layoutDirection = ref<string>(savedData?.layoutDirection || DEFAULT_LAYOUT_DIRECTION);
 
   const plottedNodes = ref<PlottedNodeData[]>([]);
   const plottedEdges = ref<RenderedEdgeData[]>([]);
@@ -35,14 +35,15 @@ export function useFlowEditor() {
     layoutDirection,
     generateNodeId,
     generateEdgeId,
-    saveDataToStorage,
     updateLayout: layout.updateLayout,
     runLayout: layout.runLayout
   });
 
   const { generateMermaidCode } = useMermaid(rawNodes, rawEdges);
 
-  layout.updateLayout();
+  // 初始化布局（延迟执行，与其他操作保持一致）
+  // 注意：这里不调用 updateLayout，因为会在 App.vue 中通过 customRunLayout 统一处理
+
 
   return {
     rawNodes,

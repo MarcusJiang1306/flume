@@ -1,7 +1,7 @@
 import { type Ref } from 'vue';
 import type { NodeData, EdgeData, PlottedNodeData, LayoutDirection, RenderedEdgeData } from '../types';
 import * as dagre from 'dagre';
-import { dirIndexToString, getRenderDirIndex, rotatePoint, computeRotatedBounds, LAYOUT_ROTATION } from '../utils/direction';
+import { dirIndexToString, getRenderDirIndex, rotatePoint, LAYOUT_ROTATION } from '../utils/direction';
 import { CANVAS_CONFIG, createDagreGraph, computeBounds, DEFAULT_NODE_INFO } from '../utils/layout';
 
 export interface LayoutOptions {
@@ -10,13 +10,14 @@ export interface LayoutOptions {
   layoutDirection: Ref<string>;
   plottedNodes: Ref<PlottedNodeData[]>;
   plottedEdges: Ref<RenderedEdgeData[]>;
-  saveDataToStorage: (nodes: NodeData[], edges: EdgeData[]) => void;
+  saveDataToStorage: (nodes: NodeData[], edges: EdgeData[], layoutDirection?: string) => void;
 }
 
 export function useLayout(options: LayoutOptions) {
   const { rawNodes, rawEdges, layoutDirection, plottedNodes, plottedEdges, saveDataToStorage } = options;
 
-  const updateLayout = () => {
+  // 核心布局计算（不触发保存）
+  const computeLayout = () => {
     if (rawNodes.value.length === 0) {
       plottedNodes.value = [];
       plottedEdges.value = [];
@@ -33,34 +34,46 @@ export function useLayout(options: LayoutOptions) {
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
     const rotation = LAYOUT_ROTATION[direction];
+    
+    // 检测是否为 90 度旋转（LR 或 RL）
+    const isRotated90 = rotation === 1 || rotation === 3;
 
-    // 计算偏移量（根节点定位到目标位置）
-    const rootNode = rawNodes.value[0];
-    const rootInfo = rootNode ? g.node(rootNode.id) : null;
-    const rotatedBounds = computeRotatedBounds(minX, maxX, minY, maxY, rotation);
-
+    // 计算偏移量（定位根节点）
     let offsetX: number, offsetY: number;
-    if (rootInfo) {
-      const rootRotated = rotatePoint(rootInfo.x, rootInfo.y, rotation, centerX, centerY);
-      offsetX = CANVAS_CONFIG.rootTargetX - rootRotated.x;
-      offsetY = CANVAS_CONFIG.rootTargetY - rootRotated.y;
+    
+    if (rawNodes.value.length === 1) {
+      // 单节点：定位到固定位置
+      const node = rawNodes.value[0]!;
+      const info = g.node(node.id) ?? DEFAULT_NODE_INFO;
+      const w = isRotated90 ? info.height : info.width;
+      const h = isRotated90 ? info.width : info.height;
+      
+      // 旋转节点中心点
+      const rotated = rotatePoint(info.x, info.y, rotation, centerX, centerY);
+      
+      // 计算偏移量，使节点左上角定位到固定位置
+      offsetX = CANVAS_CONFIG.rootTargetX - (rotated.x - w / 2);
+      offsetY = CANVAS_CONFIG.rootTargetY - (rotated.y - h / 2);
     } else {
-      offsetX = CANVAS_CONFIG.rootTargetX - rotatedBounds.minX;
-      offsetY = CANVAS_CONFIG.rootTargetY - rotatedBounds.minY;
+      // 多节点：使用默认偏移量（0, 0），由 fitView 接管视口调整
+      offsetX = 0;
+      offsetY = 0;
     }
 
-    // 生成节点坐标
+    // 生成节点坐标（保持原始大小，不缩放）
     plottedNodes.value = rawNodes.value.map(node => {
       const info = g.node(node.id) ?? DEFAULT_NODE_INFO;
       const rotated = rotatePoint(info.x, info.y, rotation, centerX, centerY);
-      const isRotated90 = rotation === 1 || rotation === 3;
       const w = isRotated90 ? info.height : info.width;
       const h = isRotated90 ? info.width : info.height;
 
       return {
         ...node,
         data: { label: node.label, handlePositions: node.handlePositions },
-        position: { x: rotated.x + offsetX - w / 2, y: rotated.y + offsetY - h / 2 },
+        position: { 
+          x: rotated.x + offsetX - w / 2, 
+          y: rotated.y + offsetY - h / 2 
+        },
         width: w,
         height: h
       } as PlottedNodeData;
@@ -74,18 +87,27 @@ export function useLayout(options: LayoutOptions) {
         sourceHandle: e.sourceHandle !== undefined ? dirIndexToString(getRenderDirIndex(e.sourceHandle, direction)) : undefined,
         targetHandle: e.targetHandle !== undefined ? dirIndexToString(getRenderDirIndex(e.targetHandle, direction)) : undefined
       }));
+  };
 
-    saveDataToStorage(rawNodes.value, rawEdges.value);
+  // AOP：计算 + 保存
+  const updateLayout = () => {
+    computeLayout();
+    saveDataToStorage(rawNodes.value, rawEdges.value, layoutDirection.value);
+  };
+
+  // AOP：延迟执行（用于批量操作后统一刷新）
+  const runLayout = () => {
+    setTimeout(updateLayout, 0);
   };
 
   const setLayoutDirection = (direction: string) => {
     layoutDirection.value = direction;
-    updateLayout();
+    runLayout();
   };
 
   return {
     updateLayout,
-    runLayout: updateLayout,
+    runLayout,
     setLayoutDirection
   };
 }

@@ -13,8 +13,8 @@ export type LayoutDirection = keyof typeof LAYOUT_ROT;
 // 方向索引类型
 export type DirectionIndex = typeof DIR[keyof typeof DIR];
 
-// 抓手位置类型
-export type HandlePosition = 'top' | 'bottom' | 'left' | 'right';
+// 抓手位置类型（从 DIR_MAP 推导）
+export type HandlePosition = typeof DIR_MAP[number];
 
 // 节点数据类型
 export interface NodeData {

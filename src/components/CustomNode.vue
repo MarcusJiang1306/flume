@@ -1,120 +1,60 @@
 <template>
-  <div class="custom-node" @click="handleNodeClick" @dblclick="handleDoubleClick">
+  <div 
+    class="custom-node" 
+    :class="{ 'is-selected': selected }"
+    @dblclick="startEdit"
+  >
     <Handle
       v-for="position in handlePositions"
       :key="position"
-      :type="getHandleType(position)"
+      type="source"
       :position="position"
       :id="position"
       class="handle"
     />
     <input
-      :value="isEditable ? localValue : data.label"
-      @input="handleInput"
-      :disabled="!isEditable"
-      :class="{ 'editable': isEditable }"
+      v-model="localValue"
+      :disabled="!isEditing"
+      :class="{ 'is-editing': isEditing }"
       class="node-input"
-      @blur="handleBlur"
-      @click="handleInputClick"
+      @blur="saveAndExit"
       ref="inputRef"
     />
   </div>
 </template>
 
 <script setup>
-import { Handle, useVueFlow } from '@vue-flow/core';
-import { ref, nextTick, computed, watch } from 'vue';
+import { Handle } from '@vue-flow/core';
+import { ref, nextTick, computed } from 'vue';
 
 const props = defineProps({
-  data: {
-    type: Object,
-    required: true
-  },
-  id: {
-    type: String,
-    required: true
-  },
-  updateNode: {
-    type: Function,
-    required: true
-  }
+  data: { type: Object, required: true },
+  id: { type: String, required: true },
+  selected: { type: Boolean, default: false },
+  updateNode: { type: Function, required: true }
 });
 
-// 调试：打印 props 结构
-console.log('CustomNode props:', props);
-console.log('CustomNode data:', props.data);
-console.log('CustomNode data.label:', props.data.label);
-
-const emit = defineEmits(['update:data']);
-
-const isEditable = ref(false);
+const isEditing = ref(false);
 const inputRef = ref(null);
-const localValue = ref(props.data.label || '');
+const localValue = ref(props.data.label);
 
-const handlePositions = computed(() => {
-  return props.data.handlePositions || ['top', 'bottom'];
-});
+const handlePositions = computed(() => props.data.handlePositions || ['top', 'bottom']);
 
-const getHandleType = (position) => {
-  return 'source';
-};
-
-watch(() => props.data.label, (newValue) => {
-  console.log('data.label 变化:', newValue, '编辑状态:', isEditable.value);
-  if (!isEditable.value) {
-    localValue.value = newValue;
-  }
-});
-
-watch(isEditable, (newValue) => {
-  console.log('isEditable 变化:', newValue);
-  if (newValue) {
-    localValue.value = props.data.label;
-  }
-});
-
-const handleNodeClick = (event) => {
-  if (!isEditable.value) {
-  } else {
-    console.log('在编辑状态，阻止事件冒泡');
-    event.stopPropagation();
-  }
-};
-
-const handleInputClick = (event) => {
-  if (!isEditable.value) {
-  } else {
-    console.log('在编辑状态，阻止事件冒泡');
-    event.stopPropagation();
-  }
-};
-
-
-const handleInput = (event) => {
-  localValue.value = event.target.value;
-};
-
-const handleDoubleClick = (event) => {
-  isEditable.value = true;
+const startEdit = () => {
+  isEditing.value = true;
+  localValue.value = props.data.label;
   nextTick(() => {
-    if (inputRef.value) {
-      inputRef.value.focus();
-      inputRef.value.select();
-    }
+    inputRef.value?.focus();
+    inputRef.value?.select();
   });
 };
 
-const handleBlur = () => {
-  if (inputRef.value && isEditable.value) {
-    const newValue = inputRef.value.value.trim();
-    console.log('保存输入框的值:', newValue, '节点ID:', props.id);
-    if (newValue !== props.data.label) {
-      console.log('值有变化，更新节点数据');
-      // 直接调用 props.updateNode 方法更新节点数据
-      props.updateNode(props.id, { label: newValue });
-    }
+const saveAndExit = () => {
+  const newValue = localValue.value.trim();
+  if (newValue !== props.data.label) {
+    props.updateNode(props.id, { label: newValue });
   }
-  isEditable.value = false;
+  isEditing.value = false;
 };
 </script>
 
@@ -127,7 +67,6 @@ const handleBlur = () => {
   min-width: 120px;
   min-height: 40px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -136,7 +75,7 @@ const handleBlur = () => {
   position: relative;
 }
 
-.custom-node.selected {
+.custom-node.is-selected {
   border-color: #ff6b6b;
   box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
 }
@@ -156,37 +95,21 @@ const handleBlur = () => {
   width: 100%;
   min-width: 80px;
   font-family: Arial, sans-serif;
-  cursor: pointer;
+  cursor: inherit;
   user-select: none;
   pointer-events: none;
-  display: block;
-  z-index: 1;
-  position: relative;
 }
 
 .node-input:disabled {
-  cursor: pointer;
-  user-select: none;
-  color: #333;
   opacity: 1;
-  pointer-events: none;
-  display: block;
-  z-index: 1;
-  position: relative;
 }
 
-.node-input.editable {
+.node-input.is-editing {
   background: #f5f5f5;
   border-radius: 4px;
   cursor: text;
   user-select: text;
-  pointer-events: all;
-  display: block;
-}
-
-.node-input:focus {
-  background: #f5f5f5;
-  border-radius: 4px;
+  pointer-events: auto;
 }
 
 .handle {
@@ -206,23 +129,8 @@ const handleBlur = () => {
   transform: scale(1.2);
 }
 
-.handle[position="top"] {
-  top: -5px;
-}
-
-.handle[position="bottom"] {
-  bottom: -5px;
-}
-
-.handle[position="left"] {
-  left: -5px;
-}
-
-.handle[position="right"] {
-  right: -5px;
-}
-
-.node-input {
-  pointer-events: none;
-}
+.handle[data-position="top"] { top: -5px; }
+.handle[data-position="bottom"] { bottom: -5px; }
+.handle[data-position="left"] { left: -5px; }
+.handle[data-position="right"] { right: -5px; }
 </style>

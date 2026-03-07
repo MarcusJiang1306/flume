@@ -10,7 +10,6 @@ export interface GraphOperationsOptions {
   layoutDirection: Ref<string>;
   generateNodeId: () => string;
   generateEdgeId: () => string;
-  saveDataToStorage: (nodes: NodeData[], edges: EdgeData[]) => void;
   updateLayout: () => void;
   runLayout: () => void;
 }
@@ -24,7 +23,6 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     layoutDirection,
     generateNodeId,
     generateEdgeId,
-    saveDataToStorage,
     updateLayout,
     runLayout
   } = options;
@@ -61,6 +59,11 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   const handleConnect = (connection: any) => {
     const currentLayout = layoutDirection.value as LayoutDirection;
     
+    console.log('=== handleConnect ===');
+    console.log('当前布局:', currentLayout);
+    console.log('连接信息:', { source: connection.source, target: connection.target });
+    console.log('渲染方向:', { sourceHandle: connection.sourceHandle, targetHandle: connection.targetHandle });
+    
     // 将渲染方向转换为存储方向（逻辑方向，基于 TB 布局）
     const renderSourceIndex = stringToDirIndex(connection.sourceHandle);
     const renderTargetIndex = stringToDirIndex(connection.targetHandle);
@@ -68,12 +71,18 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     const storedSourceHandle = getStoredDirIndex(renderSourceIndex, currentLayout);
     const storedTargetHandle = getStoredDirIndex(renderTargetIndex, currentLayout);
     
+    console.log('存储方向:', { sourceHandle: storedSourceHandle, targetHandle: storedTargetHandle });
+    console.log('DIR 常量:', { BOTTOM: DIR.BOTTOM, TOP: DIR.TOP, LEFT: DIR.LEFT, RIGHT: DIR.RIGHT });
+    
     if (rawEdges.value.some(e => 
       e.source === connection.source && 
       e.target === connection.target && 
       e.sourceHandle === storedSourceHandle && 
       e.targetHandle === storedTargetHandle
-    )) return;
+    )) {
+      console.log('边已存在，跳过');
+      return;
+    }
 
     rawEdges.value.push({
       id: generateEdgeId(),
@@ -85,14 +94,16 @@ export function useGraphOperations(options: GraphOperationsOptions) {
       type: 'default'
     });
     
-    saveDataToStorage(rawNodes.value, rawEdges.value);
-    setTimeout(runLayout, 100);
+    console.log('边已添加，当前所有边:', rawEdges.value.map(e => ({ source: e.source, target: e.target, sH: e.sourceHandle, tH: e.targetHandle })));
+    
+    runLayout();
   };
 
   const deleteSelected = () => {
     if (selectedEdgeId.value) {
       rawEdges.value = rawEdges.value.filter(e => e.id !== selectedEdgeId.value);
       selectedEdgeId.value = null;
+      updateLayout();
     } else if (selectedNodeId.value) {
       const id = selectedNodeId.value;
       rawEdges.value = rawEdges.value.filter(e => e.source !== id && e.target !== id);
@@ -100,7 +111,6 @@ export function useGraphOperations(options: GraphOperationsOptions) {
       selectedNodeId.value = rawNodes.value[0]?.id || null;
       updateLayout();
     }
-    saveDataToStorage(rawNodes.value, rawEdges.value);
   };
 
   const updateNode = (id: string, data: Partial<NodeData>) => {
