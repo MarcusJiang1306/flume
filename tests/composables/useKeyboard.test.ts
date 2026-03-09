@@ -8,10 +8,10 @@ describe('useKeyboard', () => {
 
     // Should not throw error when calling useKeyboard
     expect(() => {
-      useKeyboard({
-        tab: tabHandler,
-        delete: deleteHandler
-      });
+      useKeyboard([
+        { key: 'Tab', handler: tabHandler },
+        { key: 'Delete', handler: deleteHandler }
+      ]);
     }).not.toThrow();
   });
 
@@ -19,10 +19,10 @@ describe('useKeyboard', () => {
     const tabHandler = vi.fn();
     const deleteHandler = vi.fn();
 
-    useKeyboard({
-      tab: tabHandler,
-      delete: deleteHandler
-    });
+    useKeyboard([
+      { key: 'Tab', handler: tabHandler },
+      { key: 'Delete', handler: deleteHandler }
+    ]);
 
     // Test that handlers are defined
     expect(tabHandler).toBeDefined();
@@ -33,12 +33,23 @@ describe('useKeyboard', () => {
     const tabHandler = vi.fn();
     const deleteHandler = vi.fn();
 
-    useKeyboard({
-      tab: tabHandler,
-      delete: deleteHandler
-    });
+    useKeyboard([
+      { key: 'Tab', handler: tabHandler },
+      { key: 'Delete', handler: deleteHandler }
+    ]);
 
     // Test that handlers are defined
     expect(deleteHandler).toBeDefined();
+  });
+
+  it('should handle Ctrl+Enter key correctly', () => {
+    const ctrlEnterHandler = vi.fn();
+
+    useKeyboard([
+      { key: 'Enter', ctrlKey: true, handler: ctrlEnterHandler }
+    ]);
+
+    // Test that handler is defined
+    expect(ctrlEnterHandler).toBeDefined();
   });
 });

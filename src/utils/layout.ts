@@ -1,4 +1,4 @@
-import type { NodeData, EdgeData, LayoutDirection } from '../types';
+import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData } from '../types';
 import * as dagre from 'dagre';
 import { CANVAS_CONFIG, DEFAULT_NODE_INFO } from '../config/constants';
 
@@ -63,4 +63,19 @@ export function computeBounds(g: dagre.graphlib.Graph, nodes: NodeData[]) {
   return bounds.minX === Infinity
     ? { minX: 0, maxX: CANVAS_CONFIG.nodeWidth, minY: 0, maxY: CANVAS_CONFIG.nodeHeight }
     : bounds;
+}
+
+// 转换 Vue Flow 节点对象为 PlottedNodeData
+export function convertToPlottedNode(node: any, isEditing: boolean = false): PlottedNodeData {
+  const nodeLabel = node.label || node.data?.label || '未命名节点';
+  return {
+    id: node.id,
+    label: nodeLabel,
+    type: node.type || 'custom',
+    position: node.position || { x: 0, y: 0 },
+    width: node.width,
+    height: node.height,
+    handlePositions: node.handlePositions || node.data?.handlePositions,
+    isEditing
+  };
 }

@@ -17,17 +17,22 @@ const {
   plottedEdges,
   selectedNode,
   layoutDirection,
-  selectNode,
-  selectEdge,
   addChildNode,
+  addSiblingNode,
+  activateNodeEdit,
+  handleDirectionKey,
   handleConnect,
+  handleNodeClick,
+  handleEdgeClick,
+  handleNodeDblClick,
+  handleSelectionChange,
+  handleFlowClick,
   deleteSelected,
   runLayout,
   setLayoutDirection,
   generateMermaidCode,
   updateNode,
-  clearSavedData,
-  setNodeEditing
+  clearSavedData
 } = useFlowEditor();
 
 // 通用布局后自动缩放函数
@@ -53,8 +58,10 @@ const nodeTypes = computed(() => markRaw({
     return h(CustomNode, {
       ...props,
       updateNode: updateNode,
-      onEditStart: (nodeId: string) => setNodeEditing(nodeId, true),
-      onEditComplete: (nodeId: string) => setNodeEditing(nodeId, false)
+      selectedNode: selectedNode,
+      'onUpdate:selectedNode': (value: any) => {
+        selectedNode.value = value;
+      }
     });
   }
 }));
@@ -84,38 +91,24 @@ const handleClearData = () => {
   }
 };
 
-// Vue Flow 事件处理
-const onNodeClick = ({ node }: any) => node?.id && selectNode(node);
-const onEdgeClick = ({ edge }: any) => edge?.id && selectEdge(edge.id);
-const onSelectionChange = ({ nodes, edges }: any) => {
-  if (edges?.[0]) selectEdge(edges[0].id);
-  else if (nodes?.[0]) selectNode(nodes[0]);
-};
-const onConnect = handleConnect;
 
-// 激活选中节点的编辑模式
-const activateNodeEdit = () => {
-  console.log('activateNodeEdit', { selectedNode: selectedNode.value });
-  if (selectedNode.value) {
-    setNodeEditing(selectedNode.value.id, true);
-  }
-};
 
 // 键盘快捷键
-useKeyboard({
-  tab: addChildNode,
-  delete: deleteSelected,
-  enter: activateNodeEdit
-});
+useKeyboard([
+  { key: 'Tab', handler: addChildNode },
+  { key: 'Delete', handler: deleteSelected, stopPropagation: true },
+  { key: 'Enter', handler: activateNodeEdit, stopPropagation: true },
+  { key: 'Enter', ctrlKey: true, handler: addSiblingNode, stopPropagation: true },
+  { key: 'ArrowUp', handler: () => handleDirectionKey('up'), stopPropagation: true },
+  { key: 'ArrowDown', handler: () => handleDirectionKey('down'), stopPropagation: true },
+  { key: 'ArrowLeft', handler: () => handleDirectionKey('left'), stopPropagation: true },
+  { key: 'ArrowRight', handler: () => handleDirectionKey('right'), stopPropagation: true }
+]);
 
 // 组件挂载时初始化布局
 onMounted(async () => {
   // 使用与其他布局操作完全相同的模式
   await customRunLayout();
-  // 初始化选中第一个节点
-  if (plottedNodes.value.length > 0 && !selectedNode.value) {
-    selectNode(plottedNodes.value[0] || null);
-  }
 });
 </script>
 
@@ -158,10 +151,12 @@ onMounted(async () => {
         :fit-view-on-init="false"
         :delete-key-code="null"
         class="vue-flow"
-        @node-click="onNodeClick"
-        @edge-click="onEdgeClick"
-        @connect="onConnect"
-        @selection-change="onSelectionChange"
+        @node-click="handleNodeClick"
+        @node-double-click="handleNodeDblClick"
+        @edge-click="handleEdgeClick"
+        @connect="handleConnect"
+        @selection-change="handleSelectionChange"
+        @click="handleFlowClick"
       >
         <Background />
         <Controls />

@@ -1,8 +1,7 @@
 <template>
   <div 
     class="custom-node" 
-    :class="{ 'is-selected': selected, 'is-editing': isEditing }"
-    @dblclick="handleDblClick"
+    :class="{ 'is-selected': isSelected, 'is-editing': isEditing }"
   >
     <Handle
       v-for="position in handlePositions"
@@ -28,24 +27,32 @@
 
 <script setup lang="ts">
 import { Handle } from '@vue-flow/core';
-import { ref, nextTick, computed, watch } from 'vue';
+import { ref, nextTick, computed, watch, type Ref } from 'vue';
+
+import type { PlottedNodeData } from '../types';
 
 const props = defineProps({
-  data: { type: Object, required: true },
   id: { type: String, required: true },
+  data: { type: Object, required: true },
   selected: { type: Boolean, default: false },
-  isEditing: { type: Boolean, default: false },
+  selectedNode: { type: Object as () => Ref<PlottedNodeData | null>, default: null },
   updateNode: { type: Function, required: true }
 });
 
-const emit = defineEmits(['edit-start', 'edit-complete']);
+const emit = defineEmits(['update:selectedNode']);
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const localValue = ref(props.data.label);
 
 const handlePositions = computed(() => props.data.handlePositions || ['top', 'bottom']);
 
-const isEditing = computed(() => props.isEditing || false);
+const nodeId = computed(() => props.id);
+const isSelected = computed(() => {
+  return props.selectedNode?.value?.id === nodeId.value;
+});
+const isEditing = computed(() => {
+  return props.selectedNode?.value?.id === nodeId.value && props.selectedNode?.value?.isEditing === true;
+});
 
 const startEdit = () => {
   localValue.value = props.data.label;
@@ -58,15 +65,13 @@ const startEdit = () => {
 const saveAndExit = () => {
   const newValue = localValue.value.trim();
   if (newValue !== props.data.label) {
-    props.updateNode(props.id, { label: newValue });
+    props.updateNode(nodeId.value, { label: newValue });
   }
-  emit('edit-complete', props.id);
-};
-
-const handleDblClick = () => {
-  console.log('handleDblClick', { nodeId: props.id, isEditing: isEditing.value, dataIsEditing: props.data.isEditing });
-  if (!isEditing.value) {
-    emit('edit-start', props.id);
+  // 重置 localValue 为 props.data.label
+  localValue.value = props.data.label;
+  // 退出编辑模式
+  if (props.selectedNode && props.selectedNode.value && props.selectedNode.value.id === nodeId.value) {
+    emit('update:selectedNode', { ...props.selectedNode.value, isEditing: false });
   }
 };
 
@@ -79,15 +84,14 @@ const handleInputEnter = (event: KeyboardEvent) => {
   saveAndExit();
 };
 
-// 监听编辑状态变化，自动聚焦到输入框
+// 监听 isEditing 的变化
 watch(() => isEditing.value, (newValue) => {
   if (newValue) {
     startEdit();
+  } else {
+    // 退出编辑模式时，只重置 localValue，不保存
+    localValue.value = props.data.label;
   }
-});
-
-defineExpose({
-  startEdit
 });
 </script>
 

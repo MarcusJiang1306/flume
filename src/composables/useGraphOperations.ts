@@ -1,6 +1,7 @@
 import { nextTick, type Ref } from 'vue';
 import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData } from '../types';
 import { DIR, stringToDirIndex, getStoredDirIndex, DEFAULT_HANDLES } from '../utils/direction';
+import { convertToPlottedNode } from '../utils/layout';
 
 export interface GraphOperationsOptions {
   rawNodes: Ref<NodeData[]>;
@@ -40,13 +41,15 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     updateNode(id, { label });
   };
 
-  const addChildNode = () => {
+  const addChildNode = (callback?: (newNodeId: string) => void) => {
     if (!selectedNode.value) return;
 
     const parentId = selectedNode.value.id;
     const newId = generateNodeId();
     
-    rawNodes.value.push({ id: newId, label: '请输入文字', type: 'custom', handlePositions: DEFAULT_HANDLES });
+    // 创建新节点并添加到 rawNodes
+    const newNode = { id: newId, label: '请输入文字', type: 'custom', handlePositions: DEFAULT_HANDLES };
+    rawNodes.value.push(newNode);
 
     rawEdges.value.push({
       id: generateEdgeId(),
@@ -57,7 +60,44 @@ export function useGraphOperations(options: GraphOperationsOptions) {
       type: 'smoothstep'
     });
 
-    nextTick(updateLayout);
+    nextTick(() => {
+      updateLayout();
+      if (callback) callback(newId);
+    });
+  };
+
+  // 查找节点的父节点 ID
+  const getParentNodeId = (nodeId: string): string | null => {
+    const parentEdges = rawEdges.value.filter(e => e.target === nodeId);
+    return parentEdges.length > 0 ? parentEdges[0].source : null;
+  };
+
+  const addSiblingNode = (callback?: (newNodeId: string) => void) => {
+    if (!selectedNode.value) return;
+
+    const selectedNodeId = selectedNode.value.id;
+    const parentId = getParentNodeId(selectedNodeId);
+    if (!parentId) return; // 如果没有父节点，无法添加兄弟节点
+
+    const newId = generateNodeId();
+    
+    // 创建新节点并添加到 rawNodes
+    const newNode = { id: newId, label: '请输入文字', type: 'custom', handlePositions: DEFAULT_HANDLES };
+    rawNodes.value.push(newNode);
+
+    rawEdges.value.push({
+      id: generateEdgeId(),
+      source: parentId,
+      target: newId,
+      sourceHandle: DIR.BOTTOM,
+      targetHandle: DIR.TOP,
+      type: 'smoothstep'
+    });
+
+    nextTick(() => {
+      updateLayout();
+      if (callback) callback(newId);
+    });
   };
 
   const handleConnect = (connection: any) => {
@@ -106,9 +146,24 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   const deleteSelected = () => {
     if (selectedNode.value) {
       const id = selectedNode.value.id;
+      
+      // 找到被删除节点的父节点
+      const parentNodeId = getParentNodeId(id);
+      
+      // 删除节点和相关边
       rawEdges.value = rawEdges.value.filter(e => e.source !== id && e.target !== id);
       rawNodes.value = rawNodes.value.filter(n => n.id !== id);
-      selectedNode.value = null;
+      
+      // 如果有父节点，将选中状态设置为父节点
+      if (parentNodeId) {
+        const parentNode = rawNodes.value.find(n => n.id === parentNodeId);
+        if (parentNode) {
+          selectedNode.value = convertToPlottedNode(parentNode, false);
+        }
+      } else {
+        selectedNode.value = null;
+      }
+      
       selectedEdge.value = null;
       updateLayout();
     } else if (selectedEdge.value) {
@@ -129,6 +184,7 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     selectEdge,
     updateNodeLabel,
     addChildNode,
+    addSiblingNode,
     handleConnect,
     deleteSelected,
     updateNode

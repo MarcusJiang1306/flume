@@ -78,7 +78,8 @@ export function useLayout(options: LayoutOptions) {
           y: rotated.y + offsetY - h / 2 
         },
         width: w,
-        height: h
+        height: h,
+        isEditing: false
       } as PlottedNodeData;
     });
 
