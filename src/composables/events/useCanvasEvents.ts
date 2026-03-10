@@ -16,6 +16,18 @@ export function useCanvasEvents() {
     store.selectNode(node);
   };
 
+  // 处理节点点击 - 如果是同一个节点则保留编辑状态
+  const handleNodeClick = (node: PlottedNodeData) => {
+    const currentNode = store.selectedNode;
+    if (currentNode && currentNode.id === node.id) {
+      // 同一个节点，保留编辑状态
+      store.selectNode({ ...node, isEditing: currentNode.isEditing });
+    } else {
+      // 不同节点，重置编辑状态
+      store.selectNode(node);
+    }
+  };
+
   // 选择边
   const selectEdge = (edge: EdgeData | null) => {
     store.selectEdge(edge);
@@ -129,6 +141,7 @@ export function useCanvasEvents() {
     getPlottedNodes,
     getPlottedEdges,
     selectNode,
+    handleNodeClick,
     selectEdge,
     handleConnect,
     addChildNode,

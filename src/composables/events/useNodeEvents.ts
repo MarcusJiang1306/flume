@@ -43,7 +43,7 @@ export function useNodeEvents() {
   // 处理编辑框失焦
   const handleInputBlur = (nodeId: string, value: string) => {
     if (value.trim()) {
-      store.updateNode(nodeId, { label: value.trim() });
+      store.updateNodeLabel(nodeId, value.trim());
     }
     if (store.selectedNode && store.selectedNode.id === nodeId) {
       store.selectNode({ ...store.selectedNode, isEditing: false });
@@ -55,7 +55,7 @@ export function useNodeEvents() {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       if (value.trim()) {
-        store.updateNode(nodeId, { label: value.trim() });
+        store.updateNodeLabel(nodeId, value.trim());
       }
       if (store.selectedNode && store.selectedNode.id === nodeId) {
         store.selectNode({ ...store.selectedNode, isEditing: false });

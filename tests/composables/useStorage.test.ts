@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadSavedData, saveDataToStorage, clearSavedData, generateNodeId, generateEdgeId, resetCounters } from '../../src/composables';
+import { useStorage } from '../../src/composables/services/useStorage';
 import type { NodeData, EdgeData } from '../../src/types';
 
 // Mock localStorage
@@ -24,14 +24,29 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('useStorage', () => {
+  let storage: ReturnType<typeof useStorage>;
+
   beforeEach(() => {
     localStorage.clear();
-    resetCounters();
+    storage = useStorage();
+    storage.resetCounters();
   });
 
   afterEach(() => {
     localStorage.clear();
-    resetCounters();
+    storage.resetCounters();
+  });
+
+  describe('useStorage composable', () => {
+    it('should return all storage functions', () => {
+      expect(storage).toBeDefined();
+      expect(typeof storage.generateEdgeId).toBe('function');
+      expect(typeof storage.generateNodeId).toBe('function');
+      expect(typeof storage.loadSavedData).toBe('function');
+      expect(typeof storage.saveDataToStorage).toBe('function');
+      expect(typeof storage.clearSavedData).toBe('function');
+      expect(typeof storage.resetCounters).toBe('function');
+    });
   });
 
   describe('loadSavedData', () => {
@@ -43,7 +58,7 @@ describe('useStorage', () => {
       };
       localStorage.setItem('mermaid-proxy-data', JSON.stringify(testData));
 
-      const result = loadSavedData();
+      const result = storage.loadSavedData();
       expect(result).toEqual({
         nodes: testData.nodes,
         edges: testData.edges,
@@ -52,14 +67,28 @@ describe('useStorage', () => {
     });
 
     it('should return null if no data is saved', () => {
-      const result = loadSavedData();
+      const result = storage.loadSavedData();
       expect(result).toBeNull();
     });
 
     it('should return null if data is corrupted', () => {
       localStorage.setItem('mermaid-proxy-data', 'invalid json');
-      const result = loadSavedData();
+      const result = storage.loadSavedData();
       expect(result).toBeNull();
+    });
+
+    it('should handle missing nodes or edges gracefully', () => {
+      const testData = {
+        layoutDirection: 'TB'
+      };
+      localStorage.setItem('mermaid-proxy-data', JSON.stringify(testData));
+
+      const result = storage.loadSavedData();
+      expect(result).toEqual({
+        nodes: [],
+        edges: [],
+        layoutDirection: 'TB'
+      });
     });
   });
 
@@ -69,11 +98,22 @@ describe('useStorage', () => {
       const edges: EdgeData[] = [{ id: 'edge-1', source: 'node-1', target: 'node-2', type: 'smoothstep' }];
       const layoutDirection = 'TB';
 
-      saveDataToStorage(nodes, edges, layoutDirection);
+      storage.saveDataToStorage(nodes, edges, layoutDirection);
       const savedData = JSON.parse(localStorage.getItem('mermaid-proxy-data') || '{}');
       expect(savedData.nodes).toEqual(nodes);
       expect(savedData.edges).toEqual(edges);
       expect(savedData.layoutDirection).toBe(layoutDirection);
+    });
+
+    it('should save data without layout direction', () => {
+      const nodes: NodeData[] = [{ id: 'node-1', label: 'Node 1', type: 'custom' }];
+      const edges: EdgeData[] = [{ id: 'edge-1', source: 'node-1', target: 'node-2', type: 'smoothstep' }];
+
+      storage.saveDataToStorage(nodes, edges);
+      const savedData = JSON.parse(localStorage.getItem('mermaid-proxy-data') || '{}');
+      expect(savedData.nodes).toEqual(nodes);
+      expect(savedData.edges).toEqual(edges);
+      expect(savedData.layoutDirection).toBeUndefined();
     });
   });
 
@@ -83,56 +123,88 @@ describe('useStorage', () => {
       localStorage.setItem('node-counter', '10');
       localStorage.setItem('edge-counter', '5');
 
-      clearSavedData();
+      storage.clearSavedData();
       expect(localStorage.getItem('mermaid-proxy-data')).toBeNull();
+    });
+
+    it('should reset counters when clearing data', () => {
+      localStorage.setItem('mermaid-proxy-data', JSON.stringify({ nodes: [], edges: [] }));
+      localStorage.setItem('node-counter', '10');
+      localStorage.setItem('edge-counter', '5');
+
+      storage.clearSavedData();
+      const id1 = storage.generateNodeId();
+      const id2 = storage.generateEdgeId();
+      expect(id1).toBe('node-1');
+      expect(id2).toBe('edge-1');
     });
   });
 
   describe('generateNodeId', () => {
     it('should generate unique node IDs', () => {
-      const id1 = generateNodeId();
-      const id2 = generateNodeId();
+      const id1 = storage.generateNodeId();
+      const id2 = storage.generateNodeId();
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^node-\d+$/);
       expect(id2).toMatch(/^node-\d+$/);
     });
 
     it('should increment counter', () => {
-      const id1 = generateNodeId();
-      const id2 = generateNodeId();
+      const id1 = storage.generateNodeId();
+      const id2 = storage.generateNodeId();
       const counter1 = parseInt(id1.split('-')[1]!);
       const counter2 = parseInt(id2.split('-')[1]!);
       expect(counter2).toBe(counter1 + 1);
+    });
+
+    it('should persist counter in localStorage', () => {
+      storage.generateNodeId();
+      const storedCounter = localStorage.getItem('node-counter');
+      expect(storedCounter).toBe('1');
     });
   });
 
   describe('generateEdgeId', () => {
     it('should generate unique edge IDs', () => {
-      const id1 = generateEdgeId();
-      const id2 = generateEdgeId();
+      const id1 = storage.generateEdgeId();
+      const id2 = storage.generateEdgeId();
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^edge-\d+$/);
       expect(id2).toMatch(/^edge-\d+$/);
     });
 
     it('should increment counter', () => {
-      const id1 = generateEdgeId();
-      const id2 = generateEdgeId();
+      const id1 = storage.generateEdgeId();
+      const id2 = storage.generateEdgeId();
       const counter1 = parseInt(id1.split('-')[1]!);
       const counter2 = parseInt(id2.split('-')[1]!);
       expect(counter2).toBe(counter1 + 1);
+    });
+
+    it('should persist counter in localStorage', () => {
+      storage.generateEdgeId();
+      const storedCounter = localStorage.getItem('edge-counter');
+      expect(storedCounter).toBe('1');
     });
   });
 
   describe('resetCounters', () => {
     it('should reset counters to zero', () => {
-      generateNodeId();
-      generateEdgeId();
-      resetCounters();
-      const id1 = generateNodeId();
-      const id2 = generateEdgeId();
+      storage.generateNodeId();
+      storage.generateEdgeId();
+      storage.resetCounters();
+      const id1 = storage.generateNodeId();
+      const id2 = storage.generateEdgeId();
       expect(id1).toBe('node-1');
       expect(id2).toBe('edge-1');
+    });
+
+    it('should reset counters in localStorage', () => {
+      storage.generateNodeId();
+      storage.generateEdgeId();
+      storage.resetCounters();
+      expect(localStorage.getItem('node-counter')).toBe('0');
+      expect(localStorage.getItem('edge-counter')).toBe('0');
     });
   });
 });

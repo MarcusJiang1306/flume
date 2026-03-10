@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData } from '../../types';
 import { DIR, stringToDirIndex, getStoredDirIndex, DEFAULT_HANDLES } from '../../utils/direction';
 import { convertToPlottedNode } from '../../utils/layout';
@@ -16,15 +16,6 @@ export function useGraphOperations(options: GraphOperationsOptions) {
   // 内部管理业务数据
   const rawNodes = ref<NodeData[]>(initialNodes);
   const rawEdges = ref<EdgeData[]>(initialEdges);
-
-  const selectNode = (selectedNode: Ref<PlottedNodeData | null>, node: PlottedNodeData | null) => {
-    selectedNode.value = node;
-  };
-
-  const selectEdge = (selectedNode: Ref<PlottedNodeData | null>, selectedEdge: Ref<EdgeData | null>, id: string) => {
-    selectedNode.value = null;
-    selectedEdge.value = rawEdges.value.find((edge: EdgeData) => edge.id === id) || null;
-  };
 
   const updateNodeLabel = (id: string, label: string) => {
     updateNode(id, { label });
@@ -197,8 +188,6 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     rawEdges,
     
     // 业务操作方法
-    selectNode,
-    selectEdge,
     updateNodeLabel,
     addChildNode,
     addSiblingNode,

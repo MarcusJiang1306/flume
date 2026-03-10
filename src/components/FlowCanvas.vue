@@ -45,19 +45,9 @@ const nodeTypes = computed(() => markRaw({
       :fit-view-on-init="false"
       :delete-key-code="null"
       class="vue-flow"
-      @node-click="(event) => canvasEvents.selectNode(convertToPlottedNode(event.node))"
+      @node-click="(event) => canvasEvents.handleNodeClick(convertToPlottedNode(event.node))"
       @edge-click="(event) => canvasEvents.selectEdge(convertToEdgeData(event.edge))"
       @connect="canvasEvents.handleConnect"
-      @selection-change="(event: any) => {
-        if (event.edges?.[0]) {
-          canvasEvents.selectEdge(convertToEdgeData(event.edges[0]));
-        } else if (event.nodes?.[0]) {
-          canvasEvents.selectNode(convertToPlottedNode(event.nodes[0]));
-        } else {
-          canvasEvents.selectNode(null);
-          canvasEvents.selectEdge(null);
-        }
-      }"
       @click="(event: any) => {
         if (event.target?.classList?.contains('vue-flow__pane')) {
           canvasEvents.selectNode(null);

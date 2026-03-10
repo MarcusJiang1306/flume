@@ -4,20 +4,20 @@ import type { NodeData, EdgeData } from '../../types';
 let edgeCounter = parseInt(localStorage.getItem('edge-counter') || '0');
 let nodeCounter = parseInt(localStorage.getItem('node-counter') || '0');
 
-export const generateEdgeId = () => {
+const generateEdgeId = () => {
   edgeCounter++;
   localStorage.setItem('edge-counter', edgeCounter.toString());
   return `edge-${edgeCounter}`;
 };
 
-export const generateNodeId = () => {
+const generateNodeId = () => {
   nodeCounter++;
   localStorage.setItem('node-counter', nodeCounter.toString());
   return `node-${nodeCounter}`;
 };
 
 // 从 localStorage 加载保存的数据
-export const loadSavedData = () => {
+const loadSavedData = () => {
   try {
     const savedData = localStorage.getItem('mermaid-proxy-data');
     if (savedData) {
@@ -35,7 +35,7 @@ export const loadSavedData = () => {
 };
 
 // 保存数据到 localStorage
-export const saveDataToStorage = (nodes: NodeData[], edges: EdgeData[], layoutDirection?: string) => {
+const saveDataToStorage = (nodes: NodeData[], edges: EdgeData[], layoutDirection?: string) => {
   try {
     localStorage.setItem('mermaid-proxy-data', JSON.stringify({ 
       nodes, 
@@ -54,14 +54,25 @@ const resetCounterValues = () => {
 };
 
 // 清除 localStorage
-export const clearSavedData = () => {
+const clearSavedData = () => {
   localStorage.removeItem('mermaid-proxy-data');
   resetCounterValues();
 };
 
 // 导出计数器重置函数（用于测试）
-export const resetCounters = () => {
+const resetCounters = () => {
   resetCounterValues();
   localStorage.setItem('node-counter', '0');
   localStorage.setItem('edge-counter', '0');
 };
+
+export function useStorage() {
+  return {
+    generateEdgeId,
+    generateNodeId,
+    loadSavedData,
+    saveDataToStorage,
+    clearSavedData,
+    resetCounters
+  };
+}

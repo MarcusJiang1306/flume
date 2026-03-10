@@ -68,7 +68,10 @@ const startEdit = () => {
 
 // 内部事件处理
 const handleClick = () => {
-  props.nodeEvents.handleNodeContentClick(props.id);
+  // 如果节点已被 Vue Flow 选中，则进入编辑模式
+  if (props.selected) {
+    props.nodeEvents.setEditing(props.id, true);
+  }
 };
 
 const handleFocus = (event: Event) => {
