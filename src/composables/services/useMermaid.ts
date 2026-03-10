@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import type { NodeData, EdgeData } from '../types';
+import type { NodeData, EdgeData } from '../../types';
 
 export function useMermaid(nodes: Ref<NodeData[]>, edges: Ref<EdgeData[]>) {
   const generateMermaidCode = (): string => {

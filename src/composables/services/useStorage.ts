@@ -1,4 +1,4 @@
-import type { NodeData, EdgeData } from '../types';
+import type { NodeData, EdgeData } from '../../types';
 
 // 生成唯一 ID
 let edgeCounter = parseInt(localStorage.getItem('edge-counter') || '0');

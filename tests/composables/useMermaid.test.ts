@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { useMermaid } from '../../src/composables/useMermaid';
+import { useMermaid } from '../../src/composables';
 import { ref } from 'vue';
 import type { NodeData, EdgeData } from '../../src/types';
 

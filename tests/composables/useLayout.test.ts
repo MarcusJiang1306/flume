@@ -1,98 +1,76 @@
-import { describe, it, expect, vi } from 'vitest';
-import { useLayout } from '../../src/composables/useLayout';
-import { ref } from 'vue';
-import type { NodeData, EdgeData, PlottedNodeData, RenderedEdgeData } from '../../src/types';
+import { describe, it, expect } from 'vitest';
+import { useLayout } from '../../src/composables';
+import type { NodeData, EdgeData } from '../../src/types';
 
 describe('useLayout', () => {
-  it('should initialize with correct structure', () => {
-    const rawNodes = ref<NodeData[]>([]);
-    const rawEdges = ref<EdgeData[]>([]);
-    const layoutDirection = ref('TB');
-    const plottedNodes = ref<PlottedNodeData[]>([]);
-    const plottedEdges = ref<RenderedEdgeData[]>([]);
-    const saveDataToStorage = vi.fn();
+  it('should return correct structure', () => {
+    const rawNodes: NodeData[] = [];
+    const rawEdges: EdgeData[] = [];
+    const layoutDirection = 'TB';
 
-    const layout = useLayout({
+    const result = useLayout({
       rawNodes,
       rawEdges,
-      layoutDirection,
-      plottedNodes,
-      plottedEdges,
-      saveDataToStorage
+      layoutDirection
     });
 
-    expect(layout).toHaveProperty('updateLayout');
-    expect(layout).toHaveProperty('runLayout');
-    expect(layout).toHaveProperty('setLayoutDirection');
+    expect(result).toHaveProperty('plottedNodes');
+    expect(result).toHaveProperty('plottedEdges');
+    expect(Array.isArray(result.plottedNodes)).toBe(true);
+    expect(Array.isArray(result.plottedEdges)).toBe(true);
   });
 
-  it('should update layout when updateLayout is called', () => {
-    const rawNodes = ref<NodeData[]>([
+  it('should calculate layout for single node', () => {
+    const rawNodes: NodeData[] = [
       { id: 'node-1', label: 'Node 1', type: 'custom' }
-    ]);
-    const rawEdges = ref<EdgeData[]>([]);
-    const layoutDirection = ref('TB');
-    const plottedNodes = ref<PlottedNodeData[]>([]);
-    const plottedEdges = ref<RenderedEdgeData[]>([]);
-    const saveDataToStorage = vi.fn();
+    ];
+    const rawEdges: EdgeData[] = [];
+    const layoutDirection = 'TB';
 
-    const layout = useLayout({
+    const result = useLayout({
       rawNodes,
       rawEdges,
-      layoutDirection,
-      plottedNodes,
-      plottedEdges,
-      saveDataToStorage
+      layoutDirection
     });
 
-    layout.updateLayout();
-
-    expect(plottedNodes.value.length).toBe(1);
-    expect(saveDataToStorage).toHaveBeenCalled();
+    expect(result.plottedNodes.length).toBe(1);
+    expect(result.plottedEdges.length).toBe(0);
+    expect(result.plottedNodes[0].id).toBe('node-1');
+    expect(result.plottedNodes[0].position).toBeDefined();
   });
 
-  it('should set layout direction when setLayoutDirection is called', () => {
-    const rawNodes = ref<NodeData[]>([
-      { id: 'node-1', label: 'Node 1', type: 'custom' }
-    ]);
-    const rawEdges = ref<EdgeData[]>([]);
-    const layoutDirection = ref('TB');
-    const plottedNodes = ref<PlottedNodeData[]>([]);
-    const plottedEdges = ref<RenderedEdgeData[]>([]);
-    const saveDataToStorage = vi.fn();
+  it('should handle layout direction', () => {
+    const rawNodes: NodeData[] = [
+      { id: 'node-1', label: 'Node 1', type: 'custom' },
+      { id: 'node-2', label: 'Node 2', type: 'custom' }
+    ];
+    const rawEdges: EdgeData[] = [
+      { id: 'edge-1', source: 'node-1', target: 'node-2', type: 'smoothstep' }
+    ];
+    const layoutDirection = 'LR';
 
-    const layout = useLayout({
+    const result = useLayout({
       rawNodes,
       rawEdges,
-      layoutDirection,
-      plottedNodes,
-      plottedEdges,
-      saveDataToStorage
+      layoutDirection
     });
 
-    layout.setLayoutDirection('LR');
-    expect(layoutDirection.value).toBe('LR');
+    expect(result.plottedNodes.length).toBe(2);
+    expect(result.plottedEdges.length).toBe(1);
   });
 
   it('should handle empty nodes', () => {
-    const rawNodes = ref<NodeData[]>([]);
-    const rawEdges = ref<EdgeData[]>([]);
-    const layoutDirection = ref('TB');
-    const plottedNodes = ref<PlottedNodeData[]>([]);
-    const plottedEdges = ref<RenderedEdgeData[]>([]);
-    const saveDataToStorage = vi.fn();
+    const rawNodes: NodeData[] = [];
+    const rawEdges: EdgeData[] = [];
+    const layoutDirection = 'TB';
 
-    const layout = useLayout({
+    const result = useLayout({
       rawNodes,
       rawEdges,
-      layoutDirection,
-      plottedNodes,
-      plottedEdges,
-      saveDataToStorage
+      layoutDirection
     });
 
-    layout.updateLayout();
-    expect(plottedNodes.value).toEqual([]);
-    expect(plottedEdges.value).toEqual([]);
+    expect(result.plottedNodes).toEqual([]);
+    expect(result.plottedEdges).toEqual([]);
   });
 });

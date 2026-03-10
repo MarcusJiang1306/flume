@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadSavedData, saveDataToStorage, clearSavedData, generateNodeId, generateEdgeId, resetCounters } from '../../src/composables/useStorage';
+import { loadSavedData, saveDataToStorage, clearSavedData, generateNodeId, generateEdgeId, resetCounters } from '../../src/composables';
 import type { NodeData, EdgeData } from '../../src/types';
 
 // Mock localStorage

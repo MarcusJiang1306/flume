@@ -7,7 +7,14 @@ declare module 'dagre' {
       setNode(id: string, options: any): void;
       setEdge(source: string, target: string, options: any): void;
       node(id: string): any;
+      edges(): any[];
+      nodes(): string[];
     }
   }
+  
+  export const graphlib: {
+    Graph: new (options?: any) => graphlib.Graph;
+  };
+  
   export function layout(graph: any): void;
 }

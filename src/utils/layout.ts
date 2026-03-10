@@ -79,3 +79,16 @@ export function convertToPlottedNode(node: any, isEditing: boolean = false): Plo
     isEditing
   };
 }
+
+// 转换 Vue Flow 边对象为 EdgeData
+export function convertToEdgeData(edge: any): EdgeData {
+  return {
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    sourceHandle: edge.sourceHandle,
+    targetHandle: edge.targetHandle,
+    label: edge.data?.label,
+    type: edge.type
+  };
+}

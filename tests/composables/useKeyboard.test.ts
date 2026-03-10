@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { useKeyboard } from '../../src/composables/useKeyboard';
+import { useKeyboard } from '../../src/composables';
 
 describe('useKeyboard', () => {
   it('should have correct keyboard shortcuts interface', () => {

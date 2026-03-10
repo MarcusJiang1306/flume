@@ -14,12 +14,10 @@ export function useKeyboard(shortcuts: KeyboardShortcut[]) {
       return;
     }
 
-    // 查找匹配的快捷键
     const matchedShortcut = shortcuts.find(shortcut => 
       shortcut.key === e.key && 
-      (shortcut.ctrlKey === undefined || shortcut.ctrlKey === e.ctrlKey)
+      (shortcut.ctrlKey === undefined ? false : shortcut.ctrlKey) === e.ctrlKey
     );
-
     // 执行对应的处理函数
     if (matchedShortcut) {
       e.preventDefault(); // 默认阻止默认行为
