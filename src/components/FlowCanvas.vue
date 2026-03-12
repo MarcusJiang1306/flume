@@ -3,13 +3,15 @@ import { computed, markRaw, h } from 'vue';
 import { VueFlow } from '@vue-flow/core';
 import { Controls } from '@vue-flow/controls';
 import { Background } from '@vue-flow/background';
-import { useCanvasEvents, useNodeEvents, useKeyboard } from '../composables';
+import { useCanvasEvents, useNodeEvents, useEdgeEvents, useKeyboard } from '../composables';
 import CustomNode from './CustomNode.vue';
-import { convertToPlottedNode, convertToEdgeData } from '../utils/layout';
+import CustomEdge from './CustomEdge.vue';
+import { convertToPlottedNode } from '../utils/layout';
 
 // 事件处理
 const canvasEvents = useCanvasEvents();
 const nodeEvents = useNodeEvents();
+const edgeEvents = useEdgeEvents();
 
 // 初始化布局
 canvasEvents.initLayout();
@@ -33,6 +35,19 @@ const nodeTypes = computed(() => markRaw({
     });
   }
 }));
+
+const edgeTypes = computed(() => markRaw({
+  custom: (vueFlowProps: any) => {
+    return h(CustomEdge, {
+      ...vueFlowProps,
+      edgeEvents,
+      data: {
+        ...vueFlowProps.data,
+        label: vueFlowProps.label
+      }
+    });
+  }
+}));
 </script>
 
 <template>
@@ -41,12 +56,12 @@ const nodeTypes = computed(() => markRaw({
       :nodes="canvasEvents.getPlottedNodes()"
       :edges="canvasEvents.getPlottedEdges()"
       :node-types="nodeTypes"
+      :edge-types="edgeTypes"
       :default-viewport="{ x: 0, y: 0, zoom: 1 }"
       :fit-view-on-init="false"
       :delete-key-code="null"
       class="vue-flow"
       @node-click="(event) => canvasEvents.handleNodeClick(convertToPlottedNode(event.node))"
-      @edge-click="(event) => canvasEvents.selectEdge(convertToEdgeData(event.edge))"
       @connect="canvasEvents.handleConnect"
       @click="(event: any) => {
         if (event.target?.classList?.contains('vue-flow__pane')) {

@@ -80,6 +80,7 @@ export function useLayout(options: LayoutOptions): { plottedNodes: PlottedNodeDa
     .filter(e => g.node(e.source) && g.node(e.target))
     .map(e => ({
       ...e,
+      type: 'custom',
       sourceHandle: e.sourceHandle !== undefined ? dirIndexToString(getRenderDirIndex(e.sourceHandle, direction)) : undefined,
       targetHandle: e.targetHandle !== undefined ? dirIndexToString(getRenderDirIndex(e.targetHandle, direction)) : undefined
     }));

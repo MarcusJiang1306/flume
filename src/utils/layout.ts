@@ -1,4 +1,4 @@
-import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData } from '../types';
+import type { NodeData, EdgeData, LayoutDirection, PlottedNodeData, RenderedEdgeData } from '../types';
 import * as dagre from 'dagre';
 import { CANVAS_CONFIG, DEFAULT_NODE_INFO } from '../config/constants';
 
@@ -80,8 +80,8 @@ export function convertToPlottedNode(node: any, isEditing: boolean = false): Plo
   };
 }
 
-// 转换 Vue Flow 边对象为 EdgeData
-export function convertToEdgeData(edge: any): EdgeData {
+// 转换 Vue Flow 边对象为 RenderedEdgeData
+export function convertToEdgeData(edge: any): RenderedEdgeData {
   return {
     id: edge.id,
     source: edge.source,
@@ -89,6 +89,7 @@ export function convertToEdgeData(edge: any): EdgeData {
     sourceHandle: edge.sourceHandle,
     targetHandle: edge.targetHandle,
     label: edge.data?.label,
-    type: edge.type
+    type: edge.type,
+    isEditing: edge.isEditing
   };
 }

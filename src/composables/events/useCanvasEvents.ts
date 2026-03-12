@@ -1,6 +1,6 @@
 import { nextTick } from 'vue';
 import { useFlowStore } from '../../stores/flowStore';
-import type { PlottedNodeData, EdgeData } from '../../types';
+import type { PlottedNodeData, EdgeData, RenderedEdgeData } from '../../types';
 
 export function useCanvasEvents() {
   const store = useFlowStore();
@@ -29,7 +29,7 @@ export function useCanvasEvents() {
   };
 
   // 选择边
-  const selectEdge = (edge: EdgeData | null) => {
+  const selectEdge = (edge: RenderedEdgeData | null) => {
     store.selectEdge(edge);
   };
 

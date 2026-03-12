@@ -3,6 +3,7 @@
 // Events
 export * from './events/useCanvasEvents';
 export * from './events/useNodeEvents';
+export * from './events/useEdgeEvents';
 export * from './events/useKeyboard';
 export * from './events/useToolbarEvents';
 

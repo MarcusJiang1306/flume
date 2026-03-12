@@ -21,6 +21,10 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     updateNode(id, { label });
   };
 
+  const updateEdgeLabel = (id: string, label: string) => {
+    rawEdges.value = rawEdges.value.map((e: EdgeData) => e.id === id ? { ...e, label } : e);
+  };
+
   const addChildNode = (selectedNode: PlottedNodeData | null): string | null => {
     if (!selectedNode) return null;
 
@@ -189,6 +193,7 @@ export function useGraphOperations(options: GraphOperationsOptions) {
     
     // 业务操作方法
     updateNodeLabel,
+    updateEdgeLabel,
     addChildNode,
     addSiblingNode,
     handleConnect,

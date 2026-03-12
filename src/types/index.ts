@@ -44,6 +44,7 @@ export interface RenderedEdgeData {
   targetHandle?: HandlePosition;
   label?: string;
   type: string;
+  isEditing?: boolean;
 }
 
 // 带坐标的节点数据类型

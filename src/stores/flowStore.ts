@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useGraphOperations, useMermaid, useLayout, useStorage } from '../composables';
 import { DEFAULT_ROOT_NODE } from '../config/constants';
-import type { NodeData, EdgeData, PlottedNodeData, RenderedEdgeData } from '../types';
+import type { NodeData, PlottedNodeData, RenderedEdgeData } from '../types';
 
 // 服务实例
 let graphOps: any = null;
@@ -39,7 +39,7 @@ export const useFlowStore = defineStore('flow', {
     // 选中的节点
     selectedNode: null as PlottedNodeData | null,
     // 选中的边
-    selectedEdge: null as EdgeData | null,
+    selectedEdge: null as RenderedEdgeData | null,
     // 绘制的节点
     plottedNodes: [] as PlottedNodeData[],
     // 绘制的边
@@ -97,7 +97,7 @@ export const useFlowStore = defineStore('flow', {
     },
 
     // 选择边
-    selectEdge(edge: EdgeData | null) {
+    selectEdge(edge: RenderedEdgeData | null) {
       this.selectedEdge = edge;
       this.selectedNode = null;
     },
@@ -144,10 +144,15 @@ export const useFlowStore = defineStore('flow', {
       graphOps.updateNodeLabel(nodeId, label);
       this.computeLayout();
       this.saveDataToStorage();
+    },
+
+    // 更新边标签
+    updateEdgeLabel(edgeId: string, label: string) {
+      graphOps.updateEdgeLabel(edgeId, label);
+      this.computeLayout();
+      this.saveDataToStorage();
     }
   },
-
-
 });
 
 // 导出服务
