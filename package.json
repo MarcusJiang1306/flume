@@ -1,8 +1,36 @@
 {
   "name": "@soulglad/flume",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
+  "description": "可视化图形编辑工具，支持拖拽节点、连接线条，实时生成 Mermaid 代码",
+  "author": "Marcus Jiang",
+  "license": "MIT",
+  "main": "./dist/flume.cjs.js",
+  "module": "./dist/flume.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/flume.es.js",
+      "require": "./dist/flume.cjs.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "vue",
+    "flowchart",
+    "diagram",
+    "mermaid",
+    "graph",
+    "node-editor",
+    "visualization",
+    "canvas"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",

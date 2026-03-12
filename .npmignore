@@ -1,0 +1,49 @@
+# 源代码
+src/
+public/
+tests/
+__tests__/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# 开发配置
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+vitest.config.ts
+
+# 开发工具配置
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 文档和示例
+docs/
+examples/
+*.md
+!README.md
+PRD.png
+
+# 构建产物（dist 除外）
+node_modules/
+dist-ssr/
+
+# 环境配置
+.env
+.env.*
+!.env.example
+
+# 脚本
+scripts/
+install.js
+
+# 其他
+.git
+.gitignore
+.trae/
