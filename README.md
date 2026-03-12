@@ -1,5 +1,21 @@
+
+
+Based on the provided code map and README information, I can generate the README.md file directly. The project is already well-documented in the original README section, which provides comprehensive information about the project.
+
+Here is the README.md content:
+
 # Flume
-----
+
+<p align="center">
+  <img src="./PRD.png" alt="Flume 产品界面" width="800"/>
+</p>
+
+*从灵感到产品，每一步都可以被画出来——包括这张图本身。*
+
+---
+
+## 简介
+
 Flume 是一个可视化图形编辑工具——你拖拽节点、连接线条，它实时生成 Mermaid 代码。
 
 画架构图，本应像你思考一样流畅。  
@@ -12,13 +28,8 @@ Flume 不关心你画的是什么系统，只关心你画得顺手：
 它不是又一个画图软件。它是你思考时的草稿纸，是你和 AI 讨论架构时的共同语言。  
 你负责直觉，它负责呈现——仅此而已。
 
-<p align="center">
-  <img src="./PRD.png" alt="Flume 产品界面" width="800"/>
-</p>
-
-*从灵感到产品，每一步都可以被画出来——包括这张图本身。*
-
 ---
+
 ## 核心能力
 
 - 🎯 **直观编辑**：拖拽式操作，所见即所得的图形编辑体验
@@ -27,6 +38,8 @@ Flume 不关心你画的是什么系统，只关心你画得顺手：
 - ⌨️ **键盘导航**：丰富的快捷键，提升编辑效率
 - 💾 **本地存储**：数据持久化到本地，刷新页面不丢失
 - 🤖 **AI 协作**：生成的 Mermaid 代码可直接与 AI 交互
+
+---
 
 ## 架构概览
 
@@ -60,7 +73,6 @@ useLayout/useMermaid"]
 useStorage"]
     end
     
-    %% 正确的依赖关系
     FlowCanvas --> Events
     CustomNode --> Events
     Toolbar --> Events
@@ -88,9 +100,8 @@ Flume 采用四层架构设计：
 - 状态管理层管理和调用业务与服务层的功能
 - 图形操作模块执行具体的图形操作逻辑，依赖服务层和存储服务
 
-这种架构设计确保了数据流向的清晰性，所有操作都通过状态管理层协调，避免了直接的跨层调用，提高了系统的可维护性和扩展性。
-
 ---
+
 ## 功能列表
 
 - **拖拽节点**：自由拖拽节点到画布任意位置
@@ -104,6 +115,7 @@ Flume 采用四层架构设计：
 - **选中状态管理**：清晰的选中状态视觉反馈
 
 ---
+
 ## 快速开始
 
 ### 安装
@@ -127,7 +139,6 @@ npm install
 npm run dev
 ```
 
----
 ### 基础使用
 
 1. **创建节点**：点击画布空白处，然后按 Tab 键添加子节点
@@ -137,3 +148,54 @@ npm run dev
 5. **复制 Mermaid 代码**：点击工具栏的 "复制 Mermaid" 按钮
 6. **添加兄弟节点**：选中节点后按 Ctrl+Enter
 7. **删除元素**：选中节点或边后按 Delete 键
+
+---
+
+## 项目结构
+
+```
+flume/
+├── src/
+│   ├── components/          # Vue 组件
+│   │   ├── CustomEdge.vue   # 自定义边组件
+│   │   ├── CustomNode.vue   # 自定义节点组件
+│   │   ├── FlowCanvas.vue   # 画布组件
+│   │   └── Toolbar.vue      # 工具栏组件
+│   ├── composables/         # 组合式函数
+│   │   ├── events/          # 事件处理
+│   │   │   ├── useCanvasEvents.ts
+│   │   │   ├── useEdgeEvents.ts
+│   │   │   ├── useKeyboard.ts
+│   │   │   ├── useNodeEvents.ts
+│   │   │   └── useToolbarEvents.ts
+│   │   ├── graph/           # 图形操作
+│   │   │   └── useGraphOperations.ts
+│   │   └── services/        # 服务层
+│   │       ├── useLayout.ts
+│   │       ├── useMermaid.ts
+│   │       └── useStorage.ts
+│   ├── stores/              # 状态管理
+│   │   └── flowStore.ts
+│   ├── types/               # 类型定义
+│   ├── utils/               # 工具函数
+│   └── style.css            # 全局样式
+├── tests/                   # 测试文件
+├── public/                  # 静态资源
+└── vite.config.ts           # Vite 配置
+```
+
+---
+
+## 技术栈
+
+- Vue 3 Composition API
+- TypeScript
+- Pinia (状态管理)
+- Vue Flow (图形编辑)
+- Dagre (自动布局)
+
+---
+
+## 许可证
+
+MIT License
