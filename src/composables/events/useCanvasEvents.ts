@@ -122,16 +122,16 @@ export function useCanvasEvents() {
   };
 
   const getChildNodes = (nodeId: string) => {
-    const childEdgeIds = store.rawEdges
+    const childEdgeIds = (store.rawEdges as EdgeData[])
       .filter((edge: EdgeData) => edge.source === nodeId)
       .map((edge: EdgeData) => edge.target);
     return store.plottedNodes.filter((node: PlottedNodeData) => childEdgeIds.includes(node.id));
   };
 
   const getSiblingNodes = (nodeId: string) => {
-    const parentEdge = store.rawEdges.find((edge: EdgeData) => edge.target === nodeId);
+    const parentEdge = (store.rawEdges as EdgeData[]).find((edge: EdgeData) => edge.target === nodeId);
     if (!parentEdge) return [];
-    const siblingEdgeIds = store.rawEdges
+    const siblingEdgeIds = (store.rawEdges as EdgeData[])
       .filter((edge: EdgeData) => edge.source === parentEdge.source && edge.target !== nodeId)
       .map((edge: EdgeData) => edge.target);
     return store.plottedNodes.filter((node: PlottedNodeData) => siblingEdgeIds.includes(node.id));

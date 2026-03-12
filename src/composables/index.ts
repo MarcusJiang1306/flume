@@ -2,6 +2,7 @@
 
 // Dependencies
 export * from './useFlowDependencies';
+export * from './useFlowState';
 
 // Events
 export * from './events/useCanvasEvents';
