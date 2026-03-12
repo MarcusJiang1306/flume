@@ -1,6 +1,6 @@
 {
   "name": "@soulglad/flume",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "可视化图形编辑工具，支持拖拽节点、连接线条，实时生成 Mermaid 代码",
   "author": "Marcus Jiang",
