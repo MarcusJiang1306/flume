@@ -1,20 +1,42 @@
 import { inject, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 import { useFlowState, type FlowState } from './useFlowState';
+import { useStorage } from './services/useStorage';
+import { useGraphOperations } from './graph/useGraphOperations';
+import { useLayout } from './services/useLayout';
+import { DEFAULT_ROOT_NODE } from '../config/constants';
 
 export interface FlowDependencies {
   store: FlowState;
-  graphOps: FlowState['services']['graphOps'];
+  storage: ReturnType<typeof useStorage>;
+  graphOps: ReturnType<typeof useGraphOperations>;
+  layout: typeof useLayout;
 }
 
 const FLOW_DEPENDENCIES_KEY: InjectionKey<FlowDependencies> = Symbol('flowDependencies');
 
 export function provideFlowDependencies() {
-  const flowState = useFlowState();
+  const storage = useStorage();
+  const { loadSavedData, generateNodeId, generateEdgeId } = storage;
+  
+  const savedData = loadSavedData();
+  const initialNodes = savedData?.nodes || [DEFAULT_ROOT_NODE];
+  const initialEdges = savedData?.edges || [];
+
+  const graphOps = useGraphOperations({
+    generateNodeId,
+    generateEdgeId,
+    initialNodes,
+    initialEdges
+  });
+
+  const flowState = useFlowState(storage, graphOps, useLayout);
 
   const dependencies: FlowDependencies = {
     store: flowState,
-    graphOps: flowState.services.graphOps
+    storage,
+    graphOps,
+    layout: useLayout
   };
 
   provide(FLOW_DEPENDENCIES_KEY, dependencies);

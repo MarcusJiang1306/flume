@@ -38,15 +38,15 @@
   <script type="module">
     import { createApp } from 'vue';
     import { createPinia } from 'pinia';
-    import { FlowCanvasProvider } from '@soulglad/flume';
+    import { FlumeProvider } from '@soulglad/flume';
     import '@soulglad/flume/style.css';
     
     const app = createApp({
       template: `
-        <FlowCanvasProvider />
+        <FlumeProvider />
       `,
       components: {
-        FlowCanvasProvider
+        FlumeProvider
       }
     });
     

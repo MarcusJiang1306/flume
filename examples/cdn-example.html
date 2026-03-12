@@ -42,15 +42,15 @@
     import { createPinia } from 'pinia';
     
     // 导入构建后的 flume 包
-    import { FlowCanvasProvider } from './flume.es.js';
+    import { FlumeProvider } from './flume.es.js';
     import './flume.css';
     
     const app = createApp({
       template: `
-        <FlowCanvasProvider />
+        <FlumeProvider />
       `,
       components: {
-        FlowCanvasProvider
+        FlumeProvider
       }
     });
     

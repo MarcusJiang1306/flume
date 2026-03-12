@@ -1,11 +1,11 @@
 <template>
   <div class="app">
-    <FlowCanvasProvider />
+    <FlumeProvider />
   </div>
 </template>
 
 <script setup>
-import { FlowCanvasProvider } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
 </script>
 
 <style scoped>

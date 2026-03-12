@@ -78,12 +78,12 @@ npm link @soulglad/flume
 ```vue
 <template>
   <div style="width: 100vw; height: 100vh;">
-    <FlowCanvasProvider />
+    <FlumeProvider />
   </div>
 </template>
 
 <script setup>
-import { FlowCanvasProvider } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
 import '@soulglad/flume/style.css'
 </script>
 ```
@@ -93,7 +93,7 @@ import '@soulglad/flume/style.css'
 ```vue
 <template>
   <div style="width: 800px; height: 600px;">
-    <FlowCanvasProvider
+    <FlumeProvider
       :background="{
         pattern: 'dots',
         patternColor: '#b1b1b7',
@@ -108,23 +108,68 @@ import '@soulglad/flume/style.css'
 </template>
 
 <script setup>
-import { FlowCanvasProvider } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
 import '@soulglad/flume/style.css'
 </script>
 ```
 
-### 使用 Toolbar
+### 自定义样式
 
 ```vue
 <template>
-  <div style="width: 100vw; height: 100vh; display: flex; flex-direction: column;">
-    <ToolbarProvider />
-    <FlowCanvasProvider />
+  <div style="width: 100vw; height: 100vh;">
+    <FlumeProvider
+      container-class="my-container"
+      toolbar-class="my-toolbar"
+      canvas-class="my-canvas"
+      :style="{
+        container: { backgroundColor: '#fff' },
+        toolbar: { padding: '10px' },
+        canvas: { border: '1px solid #ccc' }
+      }"
+    />
   </div>
 </template>
 
 <script setup>
-import { FlowCanvasProvider, ToolbarProvider } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
+import '@soulglad/flume/style.css'
+</script>
+
+<style>
+.my-container {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.my-toolbar {
+  background-color: #f8f9fa;
+}
+
+.my-canvas {
+  background-color: #ffffff;
+}
+</style>
+```
+
+### 自定义组件
+
+```vue
+<template>
+  <div style="width: 100vw; height: 100vh;">
+    <FlumeProvider>
+      <template #toolbar>
+        <MyCustomToolbar />
+      </template>
+      <template #canvas>
+        <MyCustomCanvas />
+      </template>
+    </FlumeProvider>
+  </div>
+</template>
+
+<script setup>
+import { FlumeProvider } from '@soulglad/flume'
 import '@soulglad/flume/style.css'
 </script>
 ```
@@ -134,7 +179,7 @@ import '@soulglad/flume/style.css'
 1. **必须设置父容器的宽高**
    ```vue
    <div style="width: 100vw; height: 100vh;">
-     <FlowCanvasProvider />
+     <FlumeProvider />
    </div>
    ```
 
@@ -162,16 +207,8 @@ import '@soulglad/flume/style.css'
 **解决方案**：确保父容器有明确的宽高
 ```vue
 <div style="width: 100vw; height: 100vh;">
-  <FlowCanvasProvider />
+  <FlumeProvider />
 </div>
-```
-
-### 问题：错误 "FlowDependencies not provided"
-
-**解决方案**：使用 `FlowCanvasProvider` 而不是 `FlowCanvas`
-```vue
-<FlowCanvasProvider />  <!-- ✅ 正确 -->
-<FlowCanvas />         <!-- ❌ 错误 -->
 ```
 
 ### 问题：样式没有加载
