@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, markRaw, h } from 'vue';
+import { computed, markRaw, h, onMounted, nextTick } from 'vue';
 import { VueFlow } from '@vue-flow/core';
 import { Controls } from '@vue-flow/controls';
 import { Background } from '@vue-flow/background';
@@ -8,13 +8,43 @@ import CustomNode from './CustomNode.vue';
 import CustomEdge from './CustomEdge.vue';
 import { convertToPlottedNode } from '../utils/layout';
 
-// 事件处理
+interface BackgroundProps {
+  pattern?: 'dots' | 'lines' | 'cross';
+  patternColor?: string;
+  gap?: number;
+  size?: number;
+  color?: string;
+}
+
+interface Props {
+  background?: BackgroundProps;
+  showControls?: boolean;
+  showBackground?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  background: () => ({
+    pattern: 'dots',
+    patternColor: '#b1b1b7',
+    gap: 20,
+    size: 1
+  }),
+  showControls: true,
+  showBackground: true
+});
+
 const canvasEvents = useCanvasEvents();
 const nodeEvents = useNodeEvents();
 const edgeEvents = useEdgeEvents();
 
-// 初始化布局
-canvasEvents.initLayout();
+onMounted(async () => {
+  try {
+    await nextTick();
+    canvasEvents.initLayout();
+  } catch (error) {
+    console.error('Failed to initialize FlowCanvas:', error);
+  }
+});
 
 useKeyboard([
   { key: 'Tab', handler: canvasEvents.addChildNode, stopPropagation: true },
@@ -70,31 +100,15 @@ const edgeTypes = computed(() => markRaw({
         }
       }"
     >
-      <Background />
-      <Controls />
+      <Background
+        v-if="showBackground"
+        :pattern="background.pattern"
+        :pattern-color="background.patternColor"
+        :gap="background.gap"
+        :size="background.size"
+        :color="background.color"
+      />
+      <Controls v-if="showControls" />
     </VueFlow>
   </div>
 </template>
-
-<style scoped>
-.flow-container {
-  flex: 1;
-  position: relative;
-  overflow: auto;
-}
-
-.vue-flow {
-  width: 100%;
-  height: 100%;
-  background-color: white;
-}
-
-:deep(.vue-flow__edge-path) {
-  stroke: #1a73e8;
-  stroke-width: 2;
-}
-
-:deep(.vue-flow__edge.selected .vue-flow__edge-path) {
-  stroke: #ff6b6b;
-}
-</style>

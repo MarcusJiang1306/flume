@@ -1,10 +1,19 @@
-<script setup lang="ts">
-import FlumeProvider from './components/FlumeProvider.vue';
+<template>
+  <div class="app">
+    <FlumeProvider />
+  </div>
+</template>
+
+<script setup>
+import { FlumeProvider } from '@soulglad/flume'
 </script>
 
-<template>
-  <FlumeProvider />
-</template>
+<style scoped>
+.app {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
 
 <style>
 * {

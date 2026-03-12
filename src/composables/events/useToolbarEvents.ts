@@ -1,7 +1,8 @@
-import { useFlowStore, generateMermaidCode } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
+import { generateMermaidCode } from '../services/useMermaid';
 
 export function useToolbarEvents(fitView: (options?: any) => void) {
-  const store = useFlowStore();
+  const { store } = useFlowDependencies();
 
   // 状态管理
   let status: string = '就绪';
@@ -49,7 +50,7 @@ export function useToolbarEvents(fitView: (options?: any) => void) {
   // 处理复制Mermaid代码
   const handleCopyMermaid = async () => {
     try {
-      await navigator.clipboard.writeText(generateMermaidCode());
+      await navigator.clipboard.writeText(generateMermaidCode(store.rawNodes, store.rawEdges));
       showStatus('Mermaid 代码已复制到剪贴板');
     } catch {
       showStatus('复制失败，请手动复制');

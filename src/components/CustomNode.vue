@@ -35,7 +35,6 @@ import { ref, nextTick, computed, watch } from 'vue';
 interface CustomNodeProps {
   id: string;
   data: any;
-  selected: boolean;
   nodeEvents: ReturnType<typeof import('../composables').useNodeEvents>;
 }
 
@@ -68,8 +67,8 @@ const startEdit = () => {
 
 // 内部事件处理
 const handleClick = () => {
-  // 如果节点已被 Vue Flow 选中，则进入编辑模式
-  if (props.selected) {
+  // 如果节点已被选中，则进入编辑模式
+  if (isSelected.value) {
     props.nodeEvents.setEditing(props.id, true);
   }
 };
@@ -106,96 +105,4 @@ watch(localValue, () => {
 });
 </script>
 
-<style scoped>
-.custom-node {
-  padding: 8px 12px;
-  background: white;
-  border: 2px solid #1a73e8;
-  border-radius: 8px;
-  min-width: 120px;
-  min-height: 40px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  cursor: pointer;
-  position: relative;
-  box-sizing: border-box;
-}
 
-.custom-node.is-selected {
-  border-color: #ff6b6b;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
-}
-
-.custom-node.is-editing {
-  cursor: text;
-  pointer-events: none;
-  min-height: 60px;
-}
-
-.custom-node.is-editing .node-input {
-  pointer-events: auto;
-}
-
-.custom-node:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.node-input {
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color: #333;
-  text-align: center;
-  outline: none;
-  padding: 4px 8px;
-  width: 100%;
-  min-width: 80px;
-  font-family: Arial, sans-serif;
-  cursor: inherit;
-  user-select: none;
-  pointer-events: none;
-  resize: none;
-  overflow: hidden;
-  line-height: 1.4;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.node-input:disabled {
-  opacity: 1;
-}
-
-.node-input.is-editing {
-  background: #f5f5f5;
-  border-radius: 4px;
-  cursor: text;
-  user-select: text;
-  pointer-events: auto;
-  min-height: 40px;
-}
-
-.handle {
-  width: 10px;
-  height: 10px;
-  background: #1a73e8;
-  border: 2px solid white;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  position: absolute;
-  pointer-events: all;
-  z-index: 10;
-}
-
-.handle:hover {
-  background: #ff6b6b;
-  transform: scale(1.2);
-}
-
-.handle[data-position="top"] { top: -5px; }
-.handle[data-position="bottom"] { bottom: -5px; }
-.handle[data-position="left"] { left: -5px; }
-.handle[data-position="right"] { right: -5px; }
-</style>

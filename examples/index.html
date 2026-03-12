@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flume 示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    
+    #app {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js",
+      "@soulglad/flume": "./dist/flume.es.js"
+    }
+  }
+  </script>
+  
+  <script type="module">
+    import { createApp } from 'vue';
+    import { createPinia } from 'pinia';
+    import { FlumeProvider } from '@soulglad/flume';
+    import '@soulglad/flume/style.css';
+    
+    const app = createApp({
+      template: `
+        <FlumeProvider />
+      `,
+      components: {
+        FlumeProvider
+      }
+    });
+    
+    const pinia = createPinia();
+    app.use(pinia);
+    app.mount('#app');
+  </script>
+</body>
+</html>

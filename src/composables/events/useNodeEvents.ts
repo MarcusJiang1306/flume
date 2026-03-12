@@ -1,8 +1,8 @@
-import { useFlowStore } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
 import type { PlottedNodeData } from '../../types';
 
 export function useNodeEvents() {
-  const store = useFlowStore();
+  const { store } = useFlowDependencies();
 
   // 检查节点是否被选中
   const isNodeSelected = (nodeId: string) => {

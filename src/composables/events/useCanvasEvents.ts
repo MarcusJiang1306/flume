@@ -1,9 +1,9 @@
 import { nextTick } from 'vue';
-import { useFlowStore } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
 import type { PlottedNodeData, EdgeData, RenderedEdgeData } from '../../types';
 
 export function useCanvasEvents() {
-  const store = useFlowStore();
+  const { store } = useFlowDependencies();
 
   // 获取绘制的节点
   const getPlottedNodes = () => store.plottedNodes;
@@ -122,19 +122,27 @@ export function useCanvasEvents() {
   };
 
   const getChildNodes = (nodeId: string) => {
-    const childEdgeIds = store.rawEdges
+    const childEdgeIds = (store.rawEdges as EdgeData[])
       .filter((edge: EdgeData) => edge.source === nodeId)
       .map((edge: EdgeData) => edge.target);
     return store.plottedNodes.filter((node: PlottedNodeData) => childEdgeIds.includes(node.id));
   };
 
   const getSiblingNodes = (nodeId: string) => {
-    const parentEdge = store.rawEdges.find((edge: EdgeData) => edge.target === nodeId);
+    const parentEdge = (store.rawEdges as EdgeData[]).find((edge: EdgeData) => edge.target === nodeId);
     if (!parentEdge) return [];
-    const siblingEdgeIds = store.rawEdges
+    const siblingEdgeIds = (store.rawEdges as EdgeData[])
       .filter((edge: EdgeData) => edge.source === parentEdge.source && edge.target !== nodeId)
       .map((edge: EdgeData) => edge.target);
     return store.plottedNodes.filter((node: PlottedNodeData) => siblingEdgeIds.includes(node.id));
+  };
+
+  const isNodeSelected = (nodeId: string) => {
+    return store.selectedNode?.id === nodeId;
+  };
+
+  const isEdgeSelected = (edgeId: string) => {
+    return store.selectedEdge?.id === edgeId;
   };
 
   return {
@@ -149,6 +157,8 @@ export function useCanvasEvents() {
     deleteSelected,
     initLayout,
     activateNodeEdit,
-    handleDirectionKey
+    handleDirectionKey,
+    isNodeSelected,
+    isEdgeSelected
   };
 }

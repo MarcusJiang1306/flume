@@ -1,5 +1,9 @@
 // 统一导出所有 composables
 
+// Dependencies
+export * from './useFlowDependencies';
+export * from './useFlowState';
+
 // Events
 export * from './events/useCanvasEvents';
 export * from './events/useNodeEvents';

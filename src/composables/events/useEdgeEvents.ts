@@ -1,8 +1,8 @@
-import { useFlowStore } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
 import type { RenderedEdgeData } from '../../types';
 
 export function useEdgeEvents() {
-  const store = useFlowStore();
+  const { store } = useFlowDependencies();
 
   // 检查边是否被选中
   const isEdgeSelected = (edgeId: string) => {

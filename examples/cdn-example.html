@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flume CDN 示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    
+    #app {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js"
+    }
+  }
+  </script>
+  
+  <script type="module">
+    // 注意：这个示例需要你先在本地构建 flume 包
+    // 运行 npm run build 后，将 dist 目录复制到这个 examples 目录
+    
+    import { createApp } from 'vue';
+    import { createPinia } from 'pinia';
+    
+    // 导入构建后的 flume 包
+    import { FlumeProvider } from './flume.es.js';
+    import './flume.css';
+    
+    const app = createApp({
+      template: `
+        <FlumeProvider />
+      `,
+      components: {
+        FlumeProvider
+      }
+    });
+    
+    const pinia = createPinia();
+    app.use(pinia);
+    app.mount('#app');
+  </script>
+</body>
+</html>

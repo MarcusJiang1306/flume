@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flume 单文件示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    
+    #app {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js"
+    }
+  }
+  </script>
+  
+  <script type="module">
+    // ========================================
+    // Flume 单文件示例
+    // ========================================
+    // 
+    // 使用说明：
+    // 1. 将此文件保存为 example.html
+    // 2. 在 flume 项目根目录运行 npm run build
+    // 3. 将 dist/flume.es.js 和 dist/flume.css 复制到 example.html 同级目录
+    // 4. 在浏览器中打开 example.html
+    //
+    // ========================================
+    
+    import { createApp } from 'vue';
+    import { createPinia } from 'pinia';
+    
+    // 导入构建后的 flume 包
+    import { FlumeProvider } from './flume.es.js';
+    import './flume.css';
+    
+    const app = createApp({
+      template: `
+        <FlumeProvider />
+      `,
+      components: {
+        FlumeProvider
+      }
+    });
+    
+    const pinia = createPinia();
+    app.use(pinia);
+    app.mount('#app');
+    
+    console.log('🎉 Flume 示例已启动！');
+    console.log('💡 提示：按 Tab 添加子节点，Ctrl+Enter 添加兄弟节点，Delete 删除选中元素');
+  </script>
+</body>
+</html>
