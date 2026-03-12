@@ -104,28 +104,110 @@ Flume 采用四层架构设计：
 - **选中状态管理**：清晰的选中状态视觉反馈
 
 ---
-## 快速开始
+## 使用方式
 
-### 安装
+### npm install 集成到项目
 
-1. 克隆项目到本地
-
-```bash
-git clone <repository-url>
-cd flume
-```
-
-2. 安装依赖
+在您的 Vue 项目中使用 Flume 组件。
 
 ```bash
-npm install
+# 1. 安装依赖
+npm install @soulglad/flume pinia
+
+# 2. 在 main.js/main.ts 中配置 Pinia
 ```
 
-3. 启动开发服务器
+```javascript
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
 
-```bash
-npm run dev
+const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
+app.mount('#app')
 ```
+
+```vue
+<!-- 3. 在项目中使用 -->
+<template>
+  <div style="width: 100vw; height: 100vh;">
+    <FlowCanvasProvider />
+  </div>
+</template>
+
+<script setup>
+import { FlowCanvasProvider } from '@soulglad/flume'
+import '@soulglad/flume/style.css'
+</script>
+```
+
+**重要提示**：
+- 使用 `FlowCanvasProvider` 而不是 `FlowCanvas`，它会自动提供所需的依赖
+- **必须为父容器设置宽高**，例如 `width: 100vw; height: 100vh` 或其他固定尺寸
+- 如果您需要同时使用 `Toolbar`，请使用 `ToolbarProvider`
+- 确保您的项目已安装 Vue 3 和 Pinia
+
+**高级用法**：如果您想自己管理依赖注入，可以：
+
+```vue
+<template>
+  <div>
+    <Toolbar />
+    <FlowCanvas />
+  </div>
+</template>
+
+<script setup>
+import { provideFlowDependencies } from '@soulglad/flume'
+import { FlowCanvas, Toolbar } from '@soulglad/flume'
+import '@soulglad/flume/style.css'
+
+// 在根组件中提供依赖
+provideFlowDependencies()
+</script>
+```
+
+**注意**：使用此方式需要您的项目已安装 Vue 3 和 Pinia。
+
+### 自定义背景
+
+您可以自定义画布的背景样式：
+
+```vue
+<template>
+  <FlowCanvas
+    :background="{
+      pattern: 'dots',
+      patternColor: '#b1b1b7',
+      gap: 20,
+      size: 1,
+      color: '#ffffff'
+    }"
+    :show-controls="true"
+    :show-background="true"
+  />
+</template>
+
+<script setup>
+import { FlowCanvas } from '@soulglad/flume'
+import '@soulglad/flume/style.css'
+</script>
+```
+
+**背景配置选项**：
+- `pattern`: 背景图案类型（'dots' | 'lines' | 'cross'）
+- `patternColor`: 图案颜色
+- `gap`: 图案间距
+- `size`: 图案大小
+- `color`: 背景颜色
+
+**其他配置选项**：
+- `show-controls`: 是否显示控制按钮（缩放、平移）
+- `show-background`: 是否显示背景
+
+**注意**：使用此方式需要您的项目已安装 Vue 3、Pinia 等依赖。
 
 ---
 ### 基础使用

@@ -1,7 +1,7 @@
-import { useFlowStore, generateMermaidCode } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
 
 export function useToolbarEvents(fitView: (options?: any) => void) {
-  const store = useFlowStore();
+  const { store, generateMermaidCode } = useFlowDependencies();
 
   // 状态管理
   let status: string = '就绪';

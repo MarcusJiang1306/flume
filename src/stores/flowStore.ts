@@ -6,11 +6,24 @@ import type { NodeData, PlottedNodeData, RenderedEdgeData } from '../types';
 // 服务实例
 let graphOps: any = null;
 let generateMermaidCode: any = null;
-const layoutService = useLayout;
-const storageService = useStorage();
+let layoutService: any = null;
+let storageService: any = null;
+
+// 初始化标志
+let initialized = false;
 
 // 初始化服务
 function initializeServices() {
+  if (initialized) return;
+  
+  // 延迟初始化 services
+  if (!storageService) {
+    storageService = useStorage();
+  }
+  if (!layoutService) {
+    layoutService = useLayout;
+  }
+  
   const { loadSavedData, generateEdgeId, generateNodeId } = storageService;
   const savedData = loadSavedData();
   const initialNodes = savedData?.nodes || [DEFAULT_ROOT_NODE];
@@ -27,10 +40,9 @@ function initializeServices() {
   // 初始化 mermaid 服务
   const mermaidService = useMermaid(graphOps.rawNodes, graphOps.rawEdges);
   generateMermaidCode = mermaidService.generateMermaidCode;
+  
+  initialized = true;
 }
-
-// 初始化服务
-initializeServices();
 
 export const useFlowStore = defineStore('flow', {
   state: () => ({
@@ -48,14 +60,28 @@ export const useFlowStore = defineStore('flow', {
 
   getters: {
     // 获取原始节点数据
-    rawNodes: () => graphOps.rawNodes.value,
+    rawNodes: () => {
+      if (!initialized) initializeServices();
+      return graphOps.rawNodes.value;
+    },
     // 获取原始边数据
-    rawEdges: () => graphOps.rawEdges.value
+    rawEdges: () => {
+      if (!initialized) initializeServices();
+      return graphOps.rawEdges.value;
+    }
   },
 
   actions: {
+    // 初始化
+    init() {
+      if (!initialized) {
+        initializeServices();
+      }
+    },
+
     // 计算布局
     computeLayout() {
+      if (!initialized) initializeServices();
       const { plottedNodes: newPlottedNodes, plottedEdges: newPlottedEdges } = layoutService({
         rawNodes: graphOps.rawNodes.value,
         rawEdges: graphOps.rawEdges.value,
@@ -78,6 +104,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 保存数据到存储
     saveDataToStorage() {
+      if (!initialized) initializeServices();
       storageService.saveDataToStorage(graphOps.rawNodes.value, graphOps.rawEdges.value);
     },
 
@@ -85,6 +112,7 @@ export const useFlowStore = defineStore('flow', {
     clearSavedData() {
       storageService.clearSavedData();
       // 重新初始化服务
+      initialized = false;
       initializeServices();
       // 重新计算布局
       this.computeLayout();
@@ -104,6 +132,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 删除选中的元素
     deleteSelected() {
+      if (!initialized) initializeServices();
       graphOps.deleteSelected(this.selectedNode, this.selectedEdge, this);
       this.computeLayout();
       this.saveDataToStorage();
@@ -111,6 +140,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 添加子节点
     addChildNode(): string | null {
+      if (!initialized) initializeServices();
       const newNodeId = graphOps.addChildNode(this.selectedNode);
       this.computeLayout();
       this.saveDataToStorage();
@@ -119,6 +149,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 添加兄弟节点
     addSiblingNode(): string | null {
+      if (!initialized) initializeServices();
       const newNodeId = graphOps.addSiblingNode(this.selectedNode);
       this.computeLayout();
       this.saveDataToStorage();
@@ -127,6 +158,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 处理连接
     handleConnect(params: any) {
+      if (!initialized) initializeServices();
       graphOps.handleConnect(params, this.layoutDirection);
       this.computeLayout();
       this.saveDataToStorage();
@@ -134,6 +166,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 更新节点
     updateNode(nodeId: string, updates: Partial<NodeData>) {
+      if (!initialized) initializeServices();
       graphOps.updateNode(nodeId, updates);
       this.computeLayout();
       this.saveDataToStorage();
@@ -141,6 +174,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 更新节点标签
     updateNodeLabel(nodeId: string, label: string) {
+      if (!initialized) initializeServices();
       graphOps.updateNodeLabel(nodeId, label);
       this.computeLayout();
       this.saveDataToStorage();
@@ -148,6 +182,7 @@ export const useFlowStore = defineStore('flow', {
 
     // 更新边标签
     updateEdgeLabel(edgeId: string, label: string) {
+      if (!initialized) initializeServices();
       graphOps.updateEdgeLabel(edgeId, label);
       this.computeLayout();
       this.saveDataToStorage();

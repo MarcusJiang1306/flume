@@ -35,7 +35,6 @@ import { ref, nextTick, computed, watch } from 'vue';
 interface CustomNodeProps {
   id: string;
   data: any;
-  selected: boolean;
   nodeEvents: ReturnType<typeof import('../composables').useNodeEvents>;
 }
 
@@ -68,8 +67,8 @@ const startEdit = () => {
 
 // 内部事件处理
 const handleClick = () => {
-  // 如果节点已被 Vue Flow 选中，则进入编辑模式
-  if (props.selected) {
+  // 如果节点已被选中，则进入编辑模式
+  if (isSelected.value) {
     props.nodeEvents.setEditing(props.id, true);
   }
 };

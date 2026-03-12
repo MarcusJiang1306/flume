@@ -1,9 +1,9 @@
 import { nextTick } from 'vue';
-import { useFlowStore } from '../../stores/flowStore';
+import { useFlowDependencies } from '../useFlowDependencies';
 import type { PlottedNodeData, EdgeData, RenderedEdgeData } from '../../types';
 
 export function useCanvasEvents() {
-  const store = useFlowStore();
+  const { store } = useFlowDependencies();
 
   // 获取绘制的节点
   const getPlottedNodes = () => store.plottedNodes;
@@ -137,6 +137,14 @@ export function useCanvasEvents() {
     return store.plottedNodes.filter((node: PlottedNodeData) => siblingEdgeIds.includes(node.id));
   };
 
+  const isNodeSelected = (nodeId: string) => {
+    return store.selectedNode?.id === nodeId;
+  };
+
+  const isEdgeSelected = (edgeId: string) => {
+    return store.selectedEdge?.id === edgeId;
+  };
+
   return {
     getPlottedNodes,
     getPlottedEdges,
@@ -149,6 +157,8 @@ export function useCanvasEvents() {
     deleteSelected,
     initLayout,
     activateNodeEdit,
-    handleDirectionKey
+    handleDirectionKey,
+    isNodeSelected,
+    isEdgeSelected
   };
 }

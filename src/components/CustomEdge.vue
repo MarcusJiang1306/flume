@@ -52,7 +52,6 @@ import { ref, nextTick, computed, watch } from 'vue';
 interface CustomEdgeProps extends EdgeProps {
   id: string;
   data: any;
-  selected: boolean;
   edgeEvents: ReturnType<typeof import('../composables').useEdgeEvents>;
 }
 

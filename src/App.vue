@@ -2,17 +2,17 @@
 import { onMounted } from 'vue';
 import { useVueFlow } from '@vue-flow/core';
 import '@vue-flow/core/dist/style.css';
-import { useFlowStore } from './stores/flowStore';
+import { provideFlowDependencies } from './composables/useFlowDependencies';
 import Toolbar from './components/Toolbar.vue';
 import FlowCanvas from './components/FlowCanvas.vue';
 
 const { fitView } = useVueFlow();
 
-// 初始化 store
-const store = useFlowStore();
-store.computeLayout();
+// 提供依赖
+const { store } = provideFlowDependencies();
 
 onMounted(async () => {
+  store.init();
   await new Promise(resolve => setTimeout(resolve, 10));
   await import('vue').then(({ nextTick }) => nextTick());
   fitView({ padding: 0.1 });
