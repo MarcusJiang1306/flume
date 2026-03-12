@@ -25,6 +25,12 @@ export default defineConfig({
           'utf-8'
         )
         
+        // 读取 Flume 自己的样式
+        const flumeStyles = readFileSync(
+          resolve(__dirname, 'src/styles/flume.css'),
+          'utf-8'
+        )
+        
         // 合并样式
         const mergedStyles = `
 /* Vue Flow Core Styles */
@@ -32,6 +38,9 @@ ${coreStyles}
 
 /* Vue Flow Controls Styles */
 ${controlsStyles}
+
+/* Flume Styles */
+${flumeStyles}
         `.trim()
         
         // 写入合并后的样式文件
@@ -47,11 +56,10 @@ ${controlsStyles}
       formats: ['es', 'cjs', 'umd']
     },
     rollupOptions: {
-      external: ['vue', 'pinia', '@vue-flow/core', '@vue-flow/background', '@vue-flow/controls', 'dagre'],
+      external: ['vue', '@vue-flow/core', '@vue-flow/background', '@vue-flow/controls', 'dagre'],
       output: {
         globals: {
           vue: 'Vue',
-          pinia: 'Pinia',
           '@vue-flow/core': 'VueFlowCore',
           '@vue-flow/background': 'VueFlowBackground',
           '@vue-flow/controls': 'VueFlowControls',
@@ -59,7 +67,8 @@ ${controlsStyles}
         }
       }
     },
-    copyPublicDir: true
+    copyPublicDir: true,
+    cssCodeSplit: false
   },
   server: {
     port: 8101,

@@ -118,29 +118,3 @@ const getCanvasStyle = () => {
     </div>
   </div>
 </template>
-
-<style>
-.flume-provider-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: #f0f2f5;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
-}
-
-.flume-toolbar-wrapper {
-  flex-shrink: 0;
-}
-
-.flume-canvas-wrapper {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-
-.flume-extra-content {
-  flex-shrink: 0;
-}
-</style>

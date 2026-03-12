@@ -112,28 +112,3 @@ const edgeTypes = computed(() => markRaw({
     </VueFlow>
   </div>
 </template>
-
-<style scoped>
-.flow-container {
-  flex: 1;
-  position: relative;
-  overflow: auto;
-  width: 100%;
-  height: 100%;
-}
-
-.vue-flow {
-  width: 100%;
-  height: 100%;
-  background-color: white;
-}
-
-:deep(.vue-flow__edge-path) {
-  stroke: #1a73e8;
-  stroke-width: 2;
-}
-
-:deep(.vue-flow__edge.selected .vue-flow__edge-path) {
-  stroke: #ff6b6b;
-}
-</style>
