@@ -1,12 +1,11 @@
 import { reactive, computed } from 'vue';
-import { useGraphOperations, useMermaid, useLayout, useStorage } from '.';
+import { useGraphOperations, useLayout, useStorage } from '.';
 import { DEFAULT_ROOT_NODE } from '../config/constants';
 import type { NodeData, PlottedNodeData, RenderedEdgeData, EdgeData } from '../types';
 
 // 服务实例类型
 export interface Services {
   graphOps: ReturnType<typeof useGraphOperations>;
-  generateMermaidCode: ReturnType<typeof useMermaid>['generateMermaidCode'];
   layoutService: typeof useLayout;
   storageService: ReturnType<typeof useStorage>;
 }
@@ -61,10 +60,6 @@ export function useFlowState(): FlowState & { services: Services } {
     initialNodes,
     initialEdges
   });
-
-  // 初始化 mermaid 服务
-  const mermaidService = useMermaid(graphOps.rawNodes, graphOps.rawEdges);
-  const { generateMermaidCode } = mermaidService;
 
   // 响应式状态
   const state = reactive({
@@ -221,7 +216,6 @@ export function useFlowState(): FlowState & { services: Services } {
     // 服务（供 useFlowDependencies 使用）
     services: {
       graphOps,
-      generateMermaidCode,
       layoutService: useLayout,
       storageService
     }

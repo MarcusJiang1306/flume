@@ -5,7 +5,6 @@ import { useFlowState, type FlowState } from './useFlowState';
 export interface FlowDependencies {
   store: FlowState;
   graphOps: FlowState['services']['graphOps'];
-  generateMermaidCode: FlowState['services']['generateMermaidCode'];
 }
 
 const FLOW_DEPENDENCIES_KEY: InjectionKey<FlowDependencies> = Symbol('flowDependencies');
@@ -15,8 +14,7 @@ export function provideFlowDependencies() {
 
   const dependencies: FlowDependencies = {
     store: flowState,
-    graphOps: flowState.services.graphOps,
-    generateMermaidCode: flowState.services.generateMermaidCode
+    graphOps: flowState.services.graphOps
   };
 
   provide(FLOW_DEPENDENCIES_KEY, dependencies);
