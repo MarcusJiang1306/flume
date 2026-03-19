@@ -33,5 +33,5 @@ jobs:
       - name: Merge and push if update
         if: steps.check-update.outputs.no_update == 'false'
         run: |
-          git merge gitee/main
+          git merge gitee/main --allow-unrelated-histories
           git push origin main
