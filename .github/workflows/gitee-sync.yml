@@ -1,0 +1,37 @@
+name: Sync from Gitee
+
+on:
+  workflow_dispatch:            # 手动触发
+  schedule:                    # 定时触发（每天HKT 8AM = UTC 0AM）
+    - cron: '0 0 * * *'
+
+jobs:
+  sync-gitee:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Add Gitee remote and fetch
+        run: |
+          git remote add gitee https://gitee.com/marcusjiang/flume.git
+          git fetch gitee
+
+      - name: Check for gitee updates
+        id: check-update
+        run: |
+          GITEE_COMMIT=$(git rev-parse gitee/main)
+          LOCAL_COMMIT=$(git rev-parse origin/main)
+          if [ "$GITEE_COMMIT" = "$LOCAL_COMMIT" ]; then
+            echo "no_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "no_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge and push if update
+        if: steps.check-update.outputs.no_update == 'false'
+        run: |
+          git merge gitee/main
+          git push origin main
