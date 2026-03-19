@@ -35,8 +35,19 @@ jobs:
             echo "no_update=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Merge and push if update
+      - name: Merge gitee/main
         if: steps.check-update.outputs.no_update == 'false'
         run: |
-          git merge gitee/main --allow-unrelated-histories
+          git merge gitee/main --allow-unrelated-histories || echo "merge conflict"
+
+      - name: Resolve conflicts using remote (theirs)
+        if: steps.check-update.outputs.no_update == 'false'
+        run: |
+          git diff --name-only --diff-filter=U | xargs -I {} git checkout --theirs {}
+          git add .
+          git commit -m "Resolve merge conflicts using remote version" || echo "no conflict"
+
+      - name: Push to origin
+        if: steps.check-update.outputs.no_update == 'false'
+        run: |
           git push origin main
