@@ -28,8 +28,7 @@
   <script type="importmap">
   {
     "imports": {
-      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js"
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
     }
   }
   </script>
@@ -39,7 +38,6 @@
     // 运行 npm run build 后，将 dist 目录复制到这个 examples 目录
     
     import { createApp } from 'vue';
-    import { createPinia } from 'pinia';
     
     // 导入构建后的 flume 包
     import { FlumeProvider } from './flume.es.js';
@@ -54,8 +52,6 @@
       }
     });
     
-    const pinia = createPinia();
-    app.use(pinia);
     app.mount('#app');
   </script>
 </body>

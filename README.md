@@ -33,10 +33,14 @@ Flume 不关心你画的是什么系统，只关心你画得顺手：
 ```mermaid
 flowchart TB
     subgraph 表现层
+        FlumeProvider["FlumeProvider.vue
+根组件"]
         FlowCanvas["FlowCanvas.vue
 画布组件"]
         CustomNode["CustomNode.vue
 节点组件"]
+        CustomEdge["CustomEdge.vue
+边组件"]
         Toolbar["Toolbar.vue
 工具栏组件"]
     end
@@ -46,8 +50,13 @@ flowchart TB
 useCanvasEvents/useNodeEvents/useKeyboard/useToolbarEvents"]
     end
     
+    subgraph 依赖注入层
+        Dependencies["依赖注入
+useFlowDependencies"]
+    end
+    
     subgraph 状态管理层
-        State["状态管理
+        Store["状态管理
 flowStore"]
     end
     
@@ -61,34 +70,47 @@ useStorage"]
     end
     
     %% 正确的依赖关系
+    FlumeProvider --> Events
     FlowCanvas --> Events
     CustomNode --> Events
+    CustomEdge --> Events
     Toolbar --> Events
     
-    Events --> State
+    FlumeProvider --> Dependencies
+    FlumeProvider --> FlowCanvas
+    FlumeProvider --> Toolbar
     
-    State --> GraphOps
-    State --> Services
-    State --> Storage
+    FlowCanvas --> CustomNode
+    FlowCanvas --> CustomEdge
+    
+    Dependencies --> Store
+    
+    Events --> Store
+    
+    Store --> GraphOps
+    Store --> Services
+    Store --> Storage
     
     GraphOps --> Services
     GraphOps --> Storage
 ```
 
-Flume 采用四层架构设计：
+Flume 采用五层架构设计：
 
-1. **表现层**：包含画布、节点和工具栏等核心组件，负责界面渲染和用户交互
-2. **事件系统**：处理用户交互事件，如点击、拖拽、键盘操作等
-3. **状态管理层**：核心控制中心，管理应用状态，协调各模块工作
-4. **业务与服务层**：包含图形操作、布局服务、Mermaid 生成和存储服务
+1. **表现层**：包含 FlumeProvider 根组件、画布、节点、边和工具栏等核心组件，负责界面渲染和用户交互
+2. **事件系统**：处理用户交互事件，如点击、拖拽、键盘操作等，连接表现层和状态管理层
+3. **依赖注入层**：通过 `useFlowDependencies` 提供应用所需的依赖
+4. **状态管理层**：核心控制中心，管理应用状态，协调各模块工作
+5. **业务与服务层**：包含图形操作、布局服务、Mermaid 生成和存储服务
 
 **核心依赖关系**：
-- 表现层组件通过事件系统与状态管理层交互
-- 事件系统直接对接状态管理层，处理用户交互并触发状态更新
+- 所有表现层组件（FlumeProvider、FlowCanvas、CustomNode、CustomEdge、Toolbar）都通过事件系统与状态管理层交互
+- FlumeProvider 作为根组件，提供依赖注入并组合其他组件
+- 依赖注入层为应用提供统一的状态管理和服务
 - 状态管理层管理和调用业务与服务层的功能
 - 图形操作模块执行具体的图形操作逻辑，依赖服务层和存储服务
 
-这种架构设计确保了数据流向的清晰性，所有操作都通过状态管理层协调，避免了直接的跨层调用，提高了系统的可维护性和扩展性。
+这种架构设计确保了数据流向的清晰性，所有操作都通过事件系统和状态管理层协调，避免了直接的跨层调用，提高了系统的可维护性和扩展性。同时，通过依赖注入机制，使得组件之间的耦合度降低，更加易于测试和扩展。
 
 ---
 ## 功能列表
@@ -106,92 +128,55 @@ Flume 采用四层架构设计：
 ---
 ## 使用方式
 
-### npm install 集成到项目
+详细使用示例请参考 `examples/vue-example/` 目录，包含完整的项目配置和代码示例。
 
-在您的 Vue 项目中使用 Flume 组件。
-
-```bash
-# 1. 安装依赖
-npm install @soulglad/flume pinia
-
-# 2. 在 main.js/main.ts 中配置 Pinia
-```
-
-```javascript
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-
-const app = createApp(App)
-const pinia = createPinia()
-
-app.use(pinia)
-app.mount('#app')
-```
+**高级用法**（未经测试）：如果您想自定义工具栏或画布，可以使用插槽：
 
 ```vue
-<!-- 3. 在项目中使用 -->
 <template>
   <div style="width: 100vw; height: 100vh;">
-    <FlowCanvasProvider />
+    <FlumeProvider>
+      <template #toolbar>
+        <MyCustomToolbar />
+      </template>
+      <template #canvas>
+        <MyCustomCanvas />
+      </template>
+    </FlumeProvider>
   </div>
 </template>
 
 <script setup>
-import { FlowCanvasProvider } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
 import '@soulglad/flume/style.css'
 </script>
 ```
 
-**重要提示**：
-- 使用 `FlowCanvasProvider` 而不是 `FlowCanvas`，它会自动提供所需的依赖
-- **必须为父容器设置宽高**，例如 `width: 100vw; height: 100vh` 或其他固定尺寸
-- 如果您需要同时使用 `Toolbar`，请使用 `ToolbarProvider`
-- 确保您的项目已安装 Vue 3 和 Pinia
+**注意**：使用此方式需要您的项目已安装 Vue 3。
 
-**高级用法**：如果您想自己管理依赖注入，可以：
+### 自定义配置（未经测试）
+
+您可以自定义画布的背景样式和其他配置：
 
 ```vue
 <template>
-  <div>
-    <Toolbar />
-    <FlowCanvas />
+  <div style="width: 800px; height: 600px;">
+    <FlumeProvider
+      :background="{
+        pattern: 'dots',
+        patternColor: '#b1b1b7',
+        gap: 20,
+        size: 1,
+        color: '#ffffff'
+      }"
+      :show-controls="true"
+      :show-background="true"
+    />
   </div>
 </template>
 
 <script setup>
-import { provideFlowDependencies } from '@soulglad/flume'
-import { FlowCanvas, Toolbar } from '@soulglad/flume'
-import '@soulglad/flume/style.css'
-
-// 在根组件中提供依赖
-provideFlowDependencies()
-</script>
-```
-
-**注意**：使用此方式需要您的项目已安装 Vue 3 和 Pinia。
-
-### 自定义背景
-
-您可以自定义画布的背景样式：
-
-```vue
-<template>
-  <FlowCanvas
-    :background="{
-      pattern: 'dots',
-      patternColor: '#b1b1b7',
-      gap: 20,
-      size: 1,
-      color: '#ffffff'
-    }"
-    :show-controls="true"
-    :show-background="true"
-  />
-</template>
-
-<script setup>
-import { FlowCanvas } from '@soulglad/flume'
+import { FlumeProvider } from '@soulglad/flume'
 import '@soulglad/flume/style.css'
 </script>
 ```
@@ -207,7 +192,7 @@ import '@soulglad/flume/style.css'
 - `show-controls`: 是否显示控制按钮（缩放、平移）
 - `show-background`: 是否显示背景
 
-**注意**：使用此方式需要您的项目已安装 Vue 3、Pinia 等依赖。
+**注意**：使用此方式需要您的项目已安装 Vue 3。
 
 ---
 ### 基础使用

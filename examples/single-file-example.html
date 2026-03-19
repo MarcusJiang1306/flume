@@ -28,8 +28,7 @@
   <script type="importmap">
   {
     "imports": {
-      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js"
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
     }
   }
   </script>
@@ -48,7 +47,6 @@
     // ========================================
     
     import { createApp } from 'vue';
-    import { createPinia } from 'pinia';
     
     // 导入构建后的 flume 包
     import { FlumeProvider } from './flume.es.js';
@@ -63,8 +61,6 @@
       }
     });
     
-    const pinia = createPinia();
-    app.use(pinia);
     app.mount('#app');
     
     console.log('🎉 Flume 示例已启动！');
