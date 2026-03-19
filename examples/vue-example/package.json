@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "vue": "^3.5.29",
-    "pinia": "^2.0.0"
+    "@soulglad/flume": "^0.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.4",

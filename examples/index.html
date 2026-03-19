@@ -29,7 +29,6 @@
   {
     "imports": {
       "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-      "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js",
       "@soulglad/flume": "./dist/flume.es.js"
     }
   }
@@ -37,7 +36,6 @@
   
   <script type="module">
     import { createApp } from 'vue';
-    import { createPinia } from 'pinia';
     import { FlumeProvider } from '@soulglad/flume';
     import '@soulglad/flume/style.css';
     
@@ -50,8 +48,6 @@
       }
     });
     
-    const pinia = createPinia();
-    app.use(pinia);
     app.mount('#app');
   </script>
 </body>

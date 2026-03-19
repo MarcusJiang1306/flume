@@ -28,26 +28,30 @@ start examples\cdn-example.html
 
 ### 2. Vue 项目示例 (vue-example/)
 
-完整的 Vue + Vite 项目示例。
+完整的 Vue + Vite 项目示例，可直接参考其代码结构。
 
 **使用方法**：
 ```bash
 # 1. 进入示例目录
 cd examples\vue-example
 
-# 2. 安装依赖
+# 2. 安装依赖（包括 flume）
 npm install
 
-# 3. 安装 flume（使用本地包）
-npm install ../../soulglad-flume-0.0.1.tgz
-
-# 4. 启动开发服务器
+# 3. 启动开发服务器
 npm run dev
 ```
 
 ## 🚀 快速开始
 
-### 方式 1：使用本地构建的包
+### 方式 1：使用 npm 安装（推荐）
+
+```bash
+# 在你的项目中安装 flume
+npm install @soulglad/flume
+```
+
+### 方式 2：使用本地构建的包（开发时）
 
 ```bash
 # 1. 构建 flume
@@ -61,7 +65,7 @@ cd your-project
 npm install ../soulglad-flume-0.0.1.tgz
 ```
 
-### 方式 2：使用 npm link（开发时）
+### 方式 3：使用 npm link（开发时）
 
 ```bash
 # 1. 在 flume 项目中
@@ -71,108 +75,7 @@ npm link
 npm link @soulglad/flume
 ```
 
-## 📝 代码示例
 
-### 最简单的用法
-
-```vue
-<template>
-  <div style="width: 100vw; height: 100vh;">
-    <FlumeProvider />
-  </div>
-</template>
-
-<script setup>
-import { FlumeProvider } from '@soulglad/flume'
-import '@soulglad/flume/style.css'
-</script>
-```
-
-### 自定义配置
-
-```vue
-<template>
-  <div style="width: 800px; height: 600px;">
-    <FlumeProvider
-      :background="{
-        pattern: 'dots',
-        patternColor: '#b1b1b7',
-        gap: 20,
-        size: 1,
-        color: '#ffffff'
-      }"
-      :show-controls="true"
-      :show-background="true"
-    />
-  </div>
-</template>
-
-<script setup>
-import { FlumeProvider } from '@soulglad/flume'
-import '@soulglad/flume/style.css'
-</script>
-```
-
-### 自定义样式
-
-```vue
-<template>
-  <div style="width: 100vw; height: 100vh;">
-    <FlumeProvider
-      container-class="my-container"
-      toolbar-class="my-toolbar"
-      canvas-class="my-canvas"
-      :style="{
-        container: { backgroundColor: '#fff' },
-        toolbar: { padding: '10px' },
-        canvas: { border: '1px solid #ccc' }
-      }"
-    />
-  </div>
-</template>
-
-<script setup>
-import { FlumeProvider } from '@soulglad/flume'
-import '@soulglad/flume/style.css'
-</script>
-
-<style>
-.my-container {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.my-toolbar {
-  background-color: #f8f9fa;
-}
-
-.my-canvas {
-  background-color: #ffffff;
-}
-</style>
-```
-
-### 自定义组件
-
-```vue
-<template>
-  <div style="width: 100vw; height: 100vh;">
-    <FlumeProvider>
-      <template #toolbar>
-        <MyCustomToolbar />
-      </template>
-      <template #canvas>
-        <MyCustomCanvas />
-      </template>
-    </FlumeProvider>
-  </div>
-</template>
-
-<script setup>
-import { FlumeProvider } from '@soulglad/flume'
-import '@soulglad/flume/style.css'
-</script>
-```
 
 ## ⚠️ 重要提示
 
@@ -186,18 +89,6 @@ import '@soulglad/flume/style.css'
 2. **必须导入样式文件**
    ```javascript
    import '@soulglad/flume/style.css'
-   ```
-
-3. **必须安装 Pinia**
-   ```bash
-   npm install pinia
-   ```
-
-4. **必须在应用中使用 Pinia**
-   ```javascript
-   import { createPinia } from 'pinia'
-   const pinia = createPinia()
-   app.use(pinia)
    ```
 
 ## 🔧 故障排除
@@ -222,4 +113,3 @@ import '@soulglad/flume/style.css'
 
 - [Flume README](../README.md)
 - [Vue Flow 文档](https://vueflow.dev/)
-- [Pinia 文档](https://pinia.vuejs.org/)
