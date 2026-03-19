@@ -11,14 +11,11 @@ jobs:
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v3
-        with:
-          persist-credentials: false
 
       - name: Set Git identity
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/MarcusJiang1306/flume.git
 
 
       - name: Add Gitee remote and fetch
